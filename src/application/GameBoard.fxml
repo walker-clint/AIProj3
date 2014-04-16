@@ -64,10 +64,10 @@
             <Label font="$x3" layoutX="110.0" layoutY="50.0" text="λ =[            ]    +   decay [            ]" />
             <Button fx:id="pauseButton" layoutX="14.0" layoutY="47.0" mnemonicParsing="false" onAction="#pausePressed" prefHeight="41.9609375" prefWidth="76.0" text="Pause" visible="false" />
             <Button fx:id="stepButton" layoutX="31.0" layoutY="95.0" mnemonicParsing="false" onAction="#stepPressed" prefHeight="26.6015625" prefWidth="56.000099999997474" text="Step" visible="false" />
-            <TextField fx:id="lambdaField" layoutX="157.0" layoutY="47.0" prefWidth="66.99997792968497" />
-            <TextField fx:id="lambdaDecayField" layoutX="378.0" layoutY="47.0" prefWidth="66.9998779296875" />
-            <TextField fx:id="rewardField" layoutX="577.0" layoutY="47.0" prefWidth="66.99985585937247" />
-            <TextField fx:id="rewardDecayField" layoutX="800.0" layoutY="47.0" prefWidth="66.9998779296875" />
+            <TextField fx:id="lambdaField" layoutX="146.0" layoutY="50.0" prefWidth="66.99997792968497" />
+            <TextField fx:id="lambdaDecayField" layoutX="339.0" layoutY="50.0" prefWidth="66.9998779296875" />
+            <TextField fx:id="rewardField" layoutX="561.0" layoutY="50.0" prefWidth="66.99985585937247" />
+            <TextField fx:id="rewardDecayField" layoutX="754.0" layoutY="50.0" prefWidth="66.9998779296875" />
             <Button fx:id="random_FixedStartButton" layoutX="775.0" layoutY="88.0" minHeight="15.960929052736901" mnemonicParsing="false" onAction="#setRandom" prefHeight="21.9609290527369" prefWidth="82.0" text="Random" />
             <TextField fx:id="startXField" layoutX="729.0" layoutY="113.0" prefWidth="42.0" visible="false" />
             <TextField fx:id="startYField" layoutX="793.0" layoutY="113.0" prefWidth="42.0" visible="false" />
