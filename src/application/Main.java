@@ -43,7 +43,7 @@ public class Main extends Application {
 		mainContainer.setScreen(Main.START_SCREEN);
 		PRIMARYSTAGE_STAGE.setHeight(420);
 		PRIMARYSTAGE_STAGE.setWidth(800);
-		PRIMARYSTAGE_STAGE.setResizable(false);
+		//PRIMARYSTAGE_STAGE.setResizable(false);
 		root = new Group();
 		root.getChildren().addAll(mainContainer);
 		Scene scene = new Scene(root);
