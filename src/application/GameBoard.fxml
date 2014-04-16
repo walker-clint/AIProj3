@@ -29,8 +29,12 @@
             <Label layoutX="24.0" layoutY="25.0" text="Run Time:" />
             <Label id="runTimer" fx:id="runTimerLabel" layoutX="25.0" layoutY="41.0" prefWidth="50.0" text="0" />
             <Label layoutX="25.0" layoutY="67.0" text="Set Speed" />
-            <Label layoutX="9.0" layoutY="113.0" text="Number of Runs" />
-            <Label fx:id="numberOfRunsLabel" layoutX="22.0" layoutY="129.0" prefWidth="53.0" text="0" />
+            <Label layoutX="25.0" layoutY="110.0" text="Runs">
+              <font>
+                <Font name="Arial" size="13.0" />
+              </font>
+            </Label>
+            <Label fx:id="numberOfRunsLabel" layoutX="25.0" layoutY="129.0" prefWidth="53.0" text="0" />
             <Button layoutX="15.0" layoutY="287.0" mnemonicParsing="false" onAction="#buildRects" text="rectangles" />
             <Button layoutX="25.0" layoutY="467.0" mnemonicParsing="false" onAction="#updateArrows" text="update&#10;arrows" />
             <TextField fx:id="rotateField" layoutX="25.0" layoutY="381.0" prefWidth="53.0" text="0" />
