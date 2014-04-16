@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.*?>
+<?scenebuilder-background-color 0x66edffff?>
+
+<AnchorPane fx:id="rootScreen" maxHeight="-1.0" maxWidth="-1.0" minHeight="-1.0" minWidth="-1.0" prefHeight="880.0" prefWidth="-1.0" snapToPixel="true" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="application.GameBoardController">
+  <!-- TODO Add Nodes -->
+  <children>
+    <BorderPane layoutX="0.0" layoutY="0.0" prefHeight="-1.0" prefWidth="-1.0">
+      <bottom>
+        <Pane prefHeight="50.0" prefWidth="200.0" />
+      </bottom>
+      <center>
+        <Pane fx:id="pane" prefHeight="200.0" prefWidth="200.0" />
+      </center>
+      <left>
+        <Pane prefHeight="-1.0" prefWidth="100.0" BorderPane.alignment="TOP_LEFT">
+          <children>
+            <Button id="exitButton" fx:id="stopButton" layoutX="15.0" layoutY="526.0" mnemonicParsing="false" onAction="#stopPressed" prefHeight="41.9609375" prefWidth="71.0" text="Stop" visible="false">
+              <font>
+                <Font name="System Bold" size="16.0" fx:id="x1" />
+              </font>
+            </Button>
+            <Button fx:id="speedButton" layoutX="12.0" layoutY="83.0" mnemonicParsing="false" onAction="#setSpeed" prefWidth="76.0" text="Normal" visible="true" />
+            <Label layoutX="24.0" layoutY="25.0" text="Run Time:" />
+            <Label id="runTimer" fx:id="runTimerLabel" layoutX="25.0" layoutY="41.0" prefWidth="50.0" text="0" />
+            <Label layoutX="25.0" layoutY="67.0" text="Set Speed" />
+            <Label layoutX="9.0" layoutY="113.0" text="Number of Runs" />
+            <Label fx:id="numberOfRunsLabel" layoutX="22.0" layoutY="129.0" prefWidth="53.0" text="0" />
+            <Button layoutX="15.0" layoutY="287.0" mnemonicParsing="false" onAction="#buildRects" text="rectangles" />
+            <Button layoutX="25.0" layoutY="467.0" mnemonicParsing="false" onAction="#updateArrows" text="update&#10;arrows" />
+            <TextField fx:id="rotateField" layoutX="25.0" layoutY="381.0" prefWidth="53.0" text="0" />
+            <Button layoutX="21.0" layoutY="314.0" mnemonicParsing="false" onAction="#buildArrs" text="arrows" />
+            <TextField id="rotateField" fx:id="XField" layoutX="24.0" layoutY="410.0" prefWidth="53.0" text="20" />
+            <TextField id="rotateField" fx:id="YField" layoutX="25.0" layoutY="438.0" prefWidth="53.0" text="30" />
+            <Label layoutX="15.0" layoutY="441.0" text="Y">
+              <font>
+                <Font name="System Bold" size="12.0" fx:id="x2" />
+              </font>
+            </Label>
+            <Label font="$x2" layoutX="15.0" layoutY="413.0" text="X" />
+            <Label font="$x2" layoutX="13.0" layoutY="384.0" text="R" />
+            <TextField id="rotateField" fx:id="SField" layoutX="27.0" layoutY="353.0" prefWidth="53.0" text="1" />
+            <Label font="$x2" layoutX="15.0" layoutY="356.0" text="S" />
+            <Label layoutX="73.0" layoutY="-2.0" text="(0, 0)" />
+          </children>
+        </Pane>
+      </left>
+      <right>
+        <Pane prefHeight="200.0" prefWidth="190.0" />
+      </right>
+      <top>
+        <Pane prefHeight="150.0" prefWidth="1000.0">
+          <children>
+            <Label layoutX="458.0" layoutY="46.0" text="Reward  =[            ]    +   decay [            ]">
+              <font>
+                <Font name="System Bold" size="20.0" fx:id="x3" />
+              </font>
+            </Label>
+            <Label font="$x3" layoutX="108.0" layoutY="46.0" text="λ =[            ]    +   decay [            ]" />
+            <Button fx:id="pauseButton" layoutX="14.0" layoutY="47.0" mnemonicParsing="false" onAction="#pausePressed" prefHeight="41.9609375" prefWidth="76.0" text="Pause" visible="false" />
+            <Button fx:id="stepButton" layoutX="31.0" layoutY="95.0" mnemonicParsing="false" onAction="#stepPressed" prefHeight="26.6015625" prefWidth="56.000099999997474" text="Step" visible="false" />
+            <TextField fx:id="lambdaField" layoutX="145.0" layoutY="51.0" prefWidth="66.99997792968497" />
+            <TextField fx:id="lambdaDecayField" layoutX="339.0" layoutY="52.0" prefWidth="66.9998779296875" />
+            <TextField fx:id="rewardField" layoutX="561.0" layoutY="51.0" prefWidth="66.99985585937247" />
+            <TextField fx:id="rewardDecayField" layoutX="755.0" layoutY="52.0" prefWidth="66.9998779296875" />
+            <Button fx:id="random_FixedStartButton" layoutX="775.0" layoutY="88.0" minHeight="15.960929052736901" mnemonicParsing="false" onAction="#setRandom" prefHeight="21.9609290527369" prefWidth="66.9998779296875" text="Random" />
+            <TextField fx:id="startXField" layoutX="729.0" layoutY="113.0" prefWidth="42.0" visible="false" />
+            <TextField fx:id="startYField" layoutX="793.0" layoutY="113.0" prefWidth="42.0" visible="false" />
+            <TextField fx:id="alphaField" layoutX="286.0" layoutY="109.0" prefWidth="42.0" />
+            <TextField fx:id="gammaField" layoutX="429.0" layoutY="109.0" prefWidth="50.0" />
+            <TextField fx:id="goalXField" layoutX="928.0" layoutY="39.0" prefWidth="42.0" />
+            <TextField fx:id="goalYField" layoutX="928.0" layoutY="61.0" prefWidth="42.0" />
+            <Button fx:id="startButton" layoutX="899.0" layoutY="89.0" mnemonicParsing="false" onAction="#startPressed" prefHeight="41.9609375" prefWidth="76.0" text="Start" />
+            <Label font="$x2" layoutX="915.0" layoutY="42.0" text="X" />
+            <Label font="$x2" layoutX="915.0" layoutY="64.0" text="Y" />
+            <Label font="$x2" layoutX="895.0" layoutY="22.0" text="Goal Position" />
+            <Label font="$x3" layoutX="108.0" layoutY="76.0" text="Q(s,a)  ←  Q(s,a)  +  α        (R(s)   +   γ    Q(s',a' )   -    Q(s,a))" />
+            <Label fx:id="resultQCompleteLabel" labelFor="$resultQCompleteLabel" layoutX="102.0" layoutY="112.0" prefWidth="70.0" text="0" textOverrun="LEADING_ELLIPSIS" />
+            <Label fx:id="currentQ0Label" layoutX="194.0" layoutY="112.0" prefWidth="70.0" text="0" textOverrun="LEADING_ELLIPSIS" />
+            <Label fx:id="currentRewardLabel" layoutX="359.0" layoutY="112.0" prefWidth="50.0" text="0" textOverrun="LEADING_ELLIPSIS" />
+            <Label fx:id="nextStateQLabel" layoutX="488.0" layoutY="112.0" prefWidth="70.0" text="0" textOverrun="LEADING_ELLIPSIS" />
+            <Label fx:id="currentQ1Label" layoutX="582.0" layoutY="112.0" prefWidth="70.0" text="0" textOverrun="LEADING_ELLIPSIS" />
+            <Label layoutX="174.0" layoutY="104.0" text="←">
+              <font>
+                <Font size="20.0" fx:id="x4" />
+              </font>
+            </Label>
+            <Label font="$x4" layoutX="267.0" layoutY="104.0" text="+" />
+            <Label font="$x4" layoutX="350.0" layoutY="104.0" text="(" />
+            <Label font="$x4" layoutX="657.0" layoutY="104.0" text=")" />
+            <Label font="$x4" layoutX="412.0" layoutY="104.0" text="+" />
+            <Label font="$x4" layoutX="565.0" layoutY="104.0" text="-" />
+            <Label fx:id="startXLabel" font="$x2" layoutX="717.0" layoutY="116.0" text="X" visible="false" />
+            <Label fx:id="startYLabel" font="$x2" layoutX="780.0" layoutY="116.0" text="Y" visible="false" />
+            <Label layoutX="676.0" layoutY="90.0" text="Start Position:">
+              <font>
+                <Font name="System Bold" size="14.0" />
+              </font>
+            </Label>
+          </children>
+        </Pane>
+      </top>
+    </BorderPane>
+    <Button fx:id="exitButton" font="$x1" layoutX="907.0" layoutY="815.0" mnemonicParsing="false" onAction="#exitPressed" prefHeight="41.9609375" prefWidth="71.0" text="Exit" />
+  </children>
+</AnchorPane>

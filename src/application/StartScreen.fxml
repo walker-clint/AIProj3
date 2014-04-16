@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.*?>
+<?scenebuilder-background-color 0xf5f5dcff?>
+
+<AnchorPane fx:id="rootScreen" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="application.StartScreenController">
+  <!-- TODO Add Nodes -->
+  <children>
+    <Pane id="rootScreen" layoutX="0.0" layoutY="0.0" prefHeight="400.0" prefWidth="800.0">
+      <children>
+        <Button fx:id="startGame" layoutX="675.0" layoutY="299.0" mnemonicParsing="false" onAction="#startGameButtonPressed" prefHeight="31.9609375" prefWidth="64.0" text="Start" />
+        <Button fx:id="exit" layoutX="700.0" layoutY="343.0" mnemonicParsing="false" onAction="#exit" text="Exit" />
+        <Label layoutX="83.0" layoutY="54.0" text="AI Project 3 -- Treasure Hunter AI">
+          <font>
+            <Font name="System Bold" size="30.0" />
+          </font>
+        </Label>
+        <Label layoutX="83.0" layoutY="102.0" text="Written by: Clint Walker 2014" />
+        <Label layoutX="83.0" layoutY="348.0" text="Version: 0.1" />
+        <Label layoutX="83.0" layoutY="118.0" text="Southern Polytechnic State Univeristy" />
+        <Label layoutX="83.0" layoutY="134.0" text="CS 4523 Spring 2014" />
+      </children>
+    </Pane>
+  </children>
+</AnchorPane>
