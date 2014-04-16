@@ -1,7 +1,15 @@
 package application;
 	
+/*
+ * 	Written by Clinton Walker 2014
+ * */
+
 import java.io.File;
 import java.io.IOException;
+
+import Model.AI;
+
+import com.sun.org.apache.xalan.internal.xsltc.dom.AbsoluteIterator;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
@@ -24,8 +32,10 @@ public class Main extends Application {
 			static	Stage						PRIMARYSTAGE_STAGE;
 			static  Scene						mainScene;
 			static	Group						root;
+			static  AI 							machine;
 	
-	
+	//==============================================================================
+			
 	@Override
 	public void start(Stage primaryStage) {
 		PRIMARYSTAGE_STAGE = primaryStage;
@@ -61,6 +71,10 @@ public class Main extends Application {
 			// TODO Auto-generated catch block
 			System.out.println("problem getting canonical path");
 		}
+		
+		machine = new AI();
+		
+		
 	}
 	
 	public static void main(String[] args) {

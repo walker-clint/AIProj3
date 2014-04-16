@@ -1,5 +1,11 @@
 package application;
 
+/*
+ *  Written by Clinton Walker 2014
+ *  
+ *  
+ * */
+
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -16,6 +22,8 @@ public class StartScreenController implements Initializable, ControlledScreen {
 	@FXML 	Button		startGame;
 	@FXML	Button		exit;
 	
+	//==============================================================================
+	// FXML methods 
 	
 	@FXML
 	void startGameButtonPressed(ActionEvent event){
@@ -29,6 +37,8 @@ public class StartScreenController implements Initializable, ControlledScreen {
 	}
 	
 	//==============================================================================
+	// Required overrided methods
+	
 	@Override
 	public void setScreenParent(ScreensController screenPage) {
 		myController = screenPage;

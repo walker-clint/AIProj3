@@ -1,5 +1,9 @@
 package application;
 
+/*
+ * 	Written by Clinton Walker 2014
+ *  
+ * */
 
 
 import java.net.URL;
@@ -7,6 +11,7 @@ import java.util.ResourceBundle;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import Model.AI;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -22,6 +27,10 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.RectangleBuilder;
 
 public class GameBoardController implements Initializable, ControlledScreen {
+	
+	//==============================================================================
+	// variables
+	
 	ScreensController 		myController;
 	
 	@FXML 	AnchorPane		rootScreen;
@@ -71,7 +80,10 @@ public class GameBoardController implements Initializable, ControlledScreen {
 							alpha,
 							gamma,
 							X,
-							Y;
+							Y,
+							seedMin,
+							seedMax,
+							seedReward;
     private int				startX,
 							startY,
 							goalX,
@@ -95,6 +107,7 @@ public class GameBoardController implements Initializable, ControlledScreen {
 	
 	//==============================================================================
 	// FXML Methods
+	
 	@FXML
 	void startPressed(ActionEvent event){
 		if(started){
@@ -105,9 +118,9 @@ public class GameBoardController implements Initializable, ControlledScreen {
 				stopButton.setVisible(true);
 				stepButton.setVisible(false);
 				speedButton.setVisible(true);
-				buildRectangles();
-				
-				
+				Main.machine = new AI(goalX, goalY, seedMin, seedMax, alpha, lambda, lambdaDecay, seedReward, reward);
+				Main.machine.seedQTable();
+				buildArrows();
 				startLoop();
 				started = true;
 			} 
@@ -129,20 +142,9 @@ public class GameBoardController implements Initializable, ControlledScreen {
 	}
 	
 	@FXML 
-	void updateArrows(ActionEvent event){
-		X = Double.parseDouble(XField.getText());
-		Y = Double.parseDouble(YField.getText());
-		double s = Double.parseDouble(SField.getText());
-		double rotation = Double.parseDouble(rotateField.getText());
-		for (int c = 0; c < Main.COLUMNS; c++){
-			for (int r = 0; r < Main.ROWS; r++){
-				arrows[r][c].setRotate(rotation);
-				arrows[r][c].setScaleX(1 * s);
-				arrows[r][c].setScaleY(1 * s);
-				arrows[r][c].setLayoutX((35 * r) + X);
-				arrows[r][c].setLayoutY((35 * c) + Y);
-			}
-		}
+	void updateArrowsPressed(ActionEvent event){
+		updateBoard();
+		event.consume();
 	}
 	
 	@FXML
@@ -274,6 +276,40 @@ public class GameBoardController implements Initializable, ControlledScreen {
 		}, 0, 1);
 	}
 	
+	void setQtableColors(){
+		X = 5;
+		Y = 5;
+		for (int c = 0; c < Main.COLUMNS; c++){
+			for (int r = 0; r < Main.ROWS; r++){
+				Main.machine.setColor(r, c, (Color)rectangles[r][c].getFill());
+			}
+		}
+	}
+	
+	void updateBoard(){
+		X = Double.parseDouble(XField.getText());
+		Y = Double.parseDouble(YField.getText());
+		double s = Double.parseDouble(SField.getText());
+		double rotation = Double.parseDouble(rotateField.getText());
+		for (int c = 0; c < Main.COLUMNS; c++){
+			for (int r = 0; r < Main.ROWS; r++){
+				if (goalX == r && goalY == c){
+					Main.machine.setColor(r, c, (Color)rectangles[r][c].getFill());
+				} else {
+					arrows[r][c].setRotate(Main.machine.qtable[r][c].getDirection());
+					arrows[r][c].setScaleX(.5 * Main.machine.qtable[r][c].getScaleFactor());
+					arrows[r][c].setScaleY(.5 * Main.machine.qtable[r][c].getScaleFactor());
+					arrows[r][c].setFill(Main.machine.qtable[r][c].getColor());
+					
+					
+					arrows[r][c].setLayoutX((35 * r) + X); //remove after testing
+					arrows[r][c].setLayoutY((35 * c) + Y); //remove after testing
+					
+				}
+			}
+		}
+	}
+	
 	void buildRectangles(){
 		rectangles = new Rectangle[Main.ROWS][Main.COLUMNS];
 		//X = scrollPane.getLayoutX() + 5.0;
@@ -318,7 +354,8 @@ public class GameBoardController implements Initializable, ControlledScreen {
 					arrows[r][c].setScaleY(1 * s );
 					arrows[r][c].setLayoutX((35 * r) + starX);
 					arrows[r][c].setLayoutY((35 * c) + starY);
-				} else {
+					rectangles[r][c].setFill(Color.CORNFLOWERBLUE);
+					} else {
 					arrows[r][c] = new Polygon();
 					arrows[r][c].getPoints().addAll(new Double[] {-40.0, 40.0, 40.0, 40.0, 0.0, -60.0});
 					arrows[r][c].setFill(Color.BLACK);
@@ -452,6 +489,15 @@ public class GameBoardController implements Initializable, ControlledScreen {
 		}
 		return true;
 	}
+	
+	//==============================================================================
+	// getters and setters
+	
+	
+	
+	
+	
+	
 	
 	//==============================================================================
 	@Override

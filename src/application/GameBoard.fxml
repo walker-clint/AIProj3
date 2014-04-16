@@ -36,7 +36,7 @@
             </Label>
             <Label fx:id="numberOfRunsLabel" layoutX="25.0" layoutY="129.0" prefWidth="53.0" text="0" />
             <Button layoutX="15.0" layoutY="287.0" mnemonicParsing="false" onAction="#buildRects" text="rectangles" />
-            <Button layoutX="25.0" layoutY="467.0" mnemonicParsing="false" onAction="#updateArrows" text="update&#10;arrows" />
+            <Button layoutX="25.0" layoutY="467.0" mnemonicParsing="false" onAction="#updateArrowsPressed" text="update" />
             <TextField fx:id="rotateField" layoutX="25.0" layoutY="381.0" prefWidth="53.0" text="0" />
             <Button layoutX="21.0" layoutY="314.0" mnemonicParsing="false" onAction="#buildArrs" text="arrows" />
             <TextField id="rotateField" fx:id="XField" layoutX="24.0" layoutY="410.0" prefWidth="53.0" text="20" />
