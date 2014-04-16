@@ -56,12 +56,12 @@
       <top>
         <Pane prefHeight="150.0" prefWidth="1000.0">
           <children>
-            <Label layoutX="458.0" layoutY="46.0" text="Reward  =[            ]    +   decay [            ]">
+            <Label layoutX="459.0" layoutY="50.0" text="Reward  =[            ]    +   decay [            ]">
               <font>
-                <Font name="System Bold" size="20.0" fx:id="x3" />
+                <Font name="Arial Bold" size="20.0" fx:id="x3" />
               </font>
             </Label>
-            <Label font="$x3" layoutX="108.0" layoutY="46.0" text="λ =[            ]    +   decay [            ]" />
+            <Label font="$x3" layoutX="110.0" layoutY="50.0" text="λ =[            ]    +   decay [            ]" />
             <Button fx:id="pauseButton" layoutX="14.0" layoutY="47.0" mnemonicParsing="false" onAction="#pausePressed" prefHeight="41.9609375" prefWidth="76.0" text="Pause" visible="false" />
             <Button fx:id="stepButton" layoutX="31.0" layoutY="95.0" mnemonicParsing="false" onAction="#stepPressed" prefHeight="26.6015625" prefWidth="56.000099999997474" text="Step" visible="false" />
             <TextField fx:id="lambdaField" layoutX="157.0" layoutY="47.0" prefWidth="66.99997792968497" />
@@ -103,7 +103,7 @@
             <Label fx:id="startYLabel" font="$x2" layoutX="780.0" layoutY="116.0" text="Y" visible="false" />
             <Label layoutX="672.0" layoutY="90.0" text="Start Position:">
               <font>
-                <Font name="System Bold" size="14.0" />
+                <Font name="Arial Bold" size="14.0" />
               </font>
             </Label>
           </children>
