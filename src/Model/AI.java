@@ -5,6 +5,7 @@ import java.util.Random;
 import sun.net.www.content.audio.x_aiff;
 
 import com.sun.javafx.css.FontUnits.Weight;
+import com.sun.org.apache.regexp.internal.recompile;
 
 import javafx.scene.paint.Color;
 import application.Main;
@@ -76,7 +77,7 @@ public class AI {
 		qtable[r][c].setColor(color);
 	}
 	
-	private void updateQTable(int r, int c, double nextWeight) {
+	private double updateQTable(int r, int c, double nextWeight) {
 		// Q(s,a) = Q(s,a) + alpha(reward + (gamma * Q(s',a')) - Q(s,a)))
 		qtable[r][c].setWeight(
 				qtable[r][c].getWeight() + 
@@ -85,6 +86,7 @@ public class AI {
 						((gamma * nextWeight) -
 								qtable[r][c].getWeight())))
 				);
+		return qtable[r][c].getWeight();
 	}
 	
 	public void decayLambda() {
@@ -95,18 +97,36 @@ public class AI {
 		
 	}
 	
-	private void setDirection(int r, int c){
-		double left, right, up, down;
-		left = getLeft(r, c);
-		right = getRight(r, c);
-		up = getUp(r, c);
-		down = getDown(r, c);
-		// x = r cos(theta) 
-		// y = r cos(theta)
-		// rayx = leftx + rightx + upx + downx
-		// rayy = lefty + righty + upy + downy
-		// magnitude of ray = sq root(rayx^2+rayy^2)
-		// direction = arctan(rayy/rayx)
+	private void setDirection(int r, int c, boolean random){
+		double left, right, up, down, leftX = 0, leftY, rightX, rightY, upX, upY, downX, downY, rayX, rayY;
+		if (random){
+			
+		} else {
+			
+			left = getLeft(r, c);
+			left = updateQTable(r, c, left);
+			right = getRight(r, c);
+			right = updateQTable(r, c, right);
+			up = getUp(r, c);
+			up = updateQTable(r, c, up);
+			down = getDown(r, c);
+			down = updateQTable(r, c, down);
+			// x = r cos(theta) 
+			// cos 0 = 1
+			// cos 90 = 0
+			// cos 180 = -1
+			// cos 270 = 0
+			// y = r cos(theta)
+			// sin 0 = 0
+			// sin 90 = 1
+			// sin 180 = 0
+			// sin 270 = -1
+			// rayx = leftx + rightx + upx + downx
+			// rayy = lefty + righty + upy + downy
+			// magnitude of ray = sq root(rayx^2+rayy^2)
+			// direction = arctan(rayy/rayx)
+	
+		}
 	}
 	
 	private double getLeft(int r, int c){

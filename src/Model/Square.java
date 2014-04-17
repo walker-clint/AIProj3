@@ -15,7 +15,8 @@ public class Square {
 	private 	double			reward,
 								weight,
 								scaleFactor,
-								direction;
+								direction,
+								rotation;
 	private		boolean			isGoal;
 	private 	Color			color;
 	
@@ -29,6 +30,7 @@ public class Square {
 		direction = 0;
 		isGoal = false;
 		color = Color.WHITE;
+		rotation = 0.0;
 	}
 	
 	
@@ -74,11 +76,22 @@ public class Square {
 	public void setColor(Color color) {
 		this.color = color;
 	}
+	public double getRotation() {
+		return rotation;
+	}
+	public void setRotation(double rotation) {
+		this.rotation = rotation;
+	}
 	
 	
 	//==============================================================================
 	// methods
 	
+
+
+
+
+
 	@Override
 	public String toString() {
 		return "Square [reward=" + reward + ", weight=" + weight
