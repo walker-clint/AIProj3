@@ -1,13 +1,6 @@
-package Model;
+package model;
 
 import java.util.Random;
-
-import sun.net.www.content.audio.x_aiff;
-
-import com.sun.javafx.css.FontUnits.Weight;
-import com.sun.org.apache.regexp.internal.recompile;
-
-import javafx.scene.paint.Color;
 import application.Main;
 
 /*
@@ -26,7 +19,8 @@ public class AI {
 									seedReward,			// initial seed value for all non-goal squares
 									goalReward,			// goal value to propagate back though current path
 									seedMin,			// initial seed for the Min value of the qtable weight
-									seedMax;			// initial seed for the Max value of the qtable weight
+									seedMax,			// initial seed for the Max value of the qtable weight
+									rewardDecay;
 
 	
 	//==============================================================================
@@ -35,16 +29,19 @@ public class AI {
 		qtable = new Square[Main.ROWS][Main.COLUMNS];
 	}
 	
-	public AI(int _goalX, int _goalY, double _seedMin, double _seedMax, double _alpha, double _lambda, double _lambdaDecay, double _seedReward, double _goalReward) {
+	public AI(int _goalX, int _goalY, double _seedMin, double _seedMax, double _alpha,
+			double _gamma, double _lambda, double _lambdaDecay, double _seedReward, double _goalReward, double _rewardDecay) {
 		goalX = _goalX;
 		goalY = _goalY;
 		seedMin = _seedMin;
 		seedMax = _seedMax;
 		alpha = _alpha;
+		gamma = _gamma;
 		lambda = _lambda;
 		lambdaDecay = _lambdaDecay;
 		seedReward = _seedReward;
 		goalReward = _goalReward;
+		rewardDecay = _rewardDecay;
 		qtable = new Square[Main.ROWS][Main.COLUMNS];
 	}
 	
@@ -53,40 +50,60 @@ public class AI {
 	
 	//  http://stackoverflow.com/questions/3680637/how-to-generate-a-random-double-in-a-given-range
 	public void seedQTable() {
-
 		for (int c = 0; c < Main.COLUMNS; c++){
 			for (int r = 0; r < Main.ROWS; r++){
-				if (goalX == r && goalY == c){
-					qtable[r][c] = new Square();
-					qtable[r][c].setGoal(true);
-					qtable[r][c].setReward(goalReward);
-				} else {
-					double random = new Random().nextDouble();
-					double result = seedMin + (random * (seedMax - seedMin));
-					qtable[r][c] = new Square();
-					qtable[r][c].setWeight(result); 
-					System.out.println("random: " + result + " seeded value = " + qtable[r][c].getWeight());
-					qtable[r][c].setReward(seedReward);
-				}
+				double random = new Random().nextDouble();
+				double result = seedMin + (random * (seedMax - seedMin));
+				qtable[r][c] = new Square();
+				qtable[r][c].setWeight(result); 
+				System.out.println("double random value: " + random + "  random: " + result + " seeded value = " + qtable[r][c].getWeight());
+				qtable[r][c].setReward(seedReward);
 				System.out.println("QTable[" + r + "][" + c + "] toString: " + qtable[r][c].toString());
 			}
 		}
 	}
+	
+	public void initQTableAndBoard(){
+		for (int r = 0; r < Main.ROWS; r++ ){
+			for (int c = 0; c < Main.COLUMNS; c++){
+				if (qtable[r][c].isGoal()){
+					qtable[r][c].setWeight(0);
+					qtable[r][c].setColor("CORNFLOWERBLUE");
+					qtable[r][c].setWeight(10);
+					qtable[r][c].setReward(Main.GBC.getReward());
+				}else if (qtable[r][c].isWall()){
+					qtable[r][c].setWeight(0);
+					qtable[r][c].setColor("DARKGREY");
+					qtable[r][c].setWeight(0);
+				} else {
+					qtable[r][c].setColor("LIGHTGRAY");
+				}
+			}
+		}
+		for (int r = 0; r < Main.ROWS; r++ ){
+			for (int c = 0; c < Main.COLUMNS; c++){
+				if (!qtable[r][c].isGoal() && !qtable[r][c].isWall()){
+					setDirection(r, c, false);
+				}
+			}
+		}
+	}
+	
+	public void makeMove(int r, int c){
+		
+	}
+	
 
-	public void setColor(int r, int c, Color color) {
+	public void setColor(int r, int c, String color) {
 		qtable[r][c].setColor(color);
 	}
 	
 	private double updateQTable(int r, int c, double nextWeight) {
 		// Q(s,a) = Q(s,a) + alpha(reward + (gamma * Q(s',a')) - Q(s,a)))
-		qtable[r][c].setWeight(
-				qtable[r][c].getWeight() + 
-				(alpha * (
-						qtable[r][c].getReward() +
-						((gamma * nextWeight) -
-								qtable[r][c].getWeight())))
-				);
-		return qtable[r][c].getWeight();
+		double result =
+				qtable[r][c].getWeight() + (alpha * (qtable[r][c].getReward() + ((gamma * nextWeight) - qtable[r][c].getWeight())));
+		
+		return result;
 	}
 	
 	public void decayLambda() {
@@ -98,33 +115,53 @@ public class AI {
 	}
 	
 	private void setDirection(int r, int c, boolean random){
-		double left, right, up, down, leftX = 0, leftY, rightX, rightY, upX, upY, downX, downY, rayX, rayY;
+		double left, right, up, down, leftX = 0, rightX, upY, downY, rayX, rayY, magnitude;
 		if (random){
 			
 		} else {
-			
+			double dir = 270;
+			double qVal;
 			left = getLeft(r, c);
 			left = updateQTable(r, c, left);
+			System.out.println("qtable[" + r + "][" + c + "] left weight = " + qtable[r][c].getWeight());
+			qVal = left;
 			right = getRight(r, c);
 			right = updateQTable(r, c, right);
+			System.out.println("qtable[" + r + "][" + c + "] right weight = " + qtable[r][c].getWeight());
 			up = getUp(r, c);
 			up = updateQTable(r, c, up);
+			System.out.println("qtable[" + r + "][" + c + "] up weight = " + qtable[r][c].getWeight());
 			down = getDown(r, c);
 			down = updateQTable(r, c, down);
-			// x = r cos(theta) 
-			// cos 0 = 1
-			// cos 90 = 0
-			// cos 180 = -1
-			// cos 270 = 0
-			// y = r cos(theta)
-			// sin 0 = 0
-			// sin 90 = 1
-			// sin 180 = 0
-			// sin 270 = -1
-			// rayx = leftx + rightx + upx + downx
-			// rayy = lefty + righty + upy + downy
-			// magnitude of ray = sq root(rayx^2+rayy^2)
-			// direction = arctan(rayy/rayx)
+			System.out.println("qtable[" + r + "][" + c + "] down weight = " + qtable[r][c].getWeight());
+			if (right > qVal){
+				dir = 90;
+				qVal = right;
+			} 
+			if (up > qVal){
+				dir = 0;
+				qVal = up;
+			}
+			if (down > qVal){
+				dir = 180;
+				qVal = down;
+			}
+			qtable[r][c].setDirection(dir);
+			qtable[r][c].setWeight(qVal);
+			
+			leftX = left * -1;
+			rightX = right;
+			rayX = Math.abs(leftX + rightX);
+			upY = up;
+			downY = down * -1;
+			rayY = Math.abs(upY + downY);
+			
+			magnitude = Math.sqrt((rayX * rayX)+ (rayY * rayY)); 
+			magnitude *= 10;
+			qtable[r][c].setScaleFactorX(magnitude);
+			qtable[r][c].setScaleFactorY(magnitude);
+			
+			qtable[r][c].setRotation(Math.atan2(rayY, rayX));
 	
 		}
 	}
@@ -156,5 +193,99 @@ public class AI {
 		}
 		return 0.0;
 	}
+
+	
+	
+	//==============================================================================
+	// getters and setters
+	
+	public int getGoalX() {
+		return goalX;
+	}
+
+	public void setGoalX(int goalX) {
+		this.goalX = goalX;
+	}
+
+	public int getGoalY() {
+		return goalY;
+	}
+
+	public void setGoalY(int goalY) {
+		this.goalY = goalY;
+	}
+
+	public double getAlpha() {
+		return alpha;
+	}
+
+	public void setAlpha(double alpha) {
+		this.alpha = alpha;
+	}
+
+	public double getGamma() {
+		return gamma;
+	}
+
+	public void setGamma(double gamma) {
+		this.gamma = gamma;
+	}
+
+	public double getLambda() {
+		return lambda;
+	}
+
+	public void setLambda(double lambda) {
+		this.lambda = lambda;
+	}
+
+	public double getLambdaDecay() {
+		return lambdaDecay;
+	}
+
+	public void setLambdaDecay(double lambdaDecay) {
+		this.lambdaDecay = lambdaDecay;
+	}
+
+	public double getSeedReward() {
+		return seedReward;
+	}
+
+	public void setSeedReward(double seedReward) {
+		this.seedReward = seedReward;
+	}
+
+	public double getGoalReward() {
+		return goalReward;
+	}
+
+	public void setGoalReward(double goalReward) {
+		this.goalReward = goalReward;
+	}
+
+	public double getSeedMin() {
+		return seedMin;
+	}
+
+	public void setSeedMin(double seedMin) {
+		this.seedMin = seedMin;
+	}
+
+	public double getSeedMax() {
+		return seedMax;
+	}
+
+	public void setSeedMax(double seedMax) {
+		this.seedMax = seedMax;
+	}
+
+	public double getRewardDecay() {
+		return rewardDecay;
+	}
+
+	public void setRewardDecay(double rewardDecay) {
+		this.rewardDecay = rewardDecay;
+	}
+	
 	
 }
