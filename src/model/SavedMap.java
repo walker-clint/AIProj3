@@ -84,9 +84,12 @@ public class SavedMap implements Serializable {
 	public boolean saveMap(SavedMap map, String fileName)
 	{
 		System.out.println("Write message tostring: " + map.toString());
+		String path = Main.FILE_PATH + "\\bin\\Maps\\" + fileName + ".map";
+		System.out.println("Save File as: " + path);
 		try {
 			FileOutputStream outputStream =
-					new FileOutputStream(Main.FILE_PATH + fileName + ".map", false);
+					new FileOutputStream(path, false);
+			
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
 			ObjectOutputStream os = new ObjectOutputStream(out);
 			os.writeObject(map);

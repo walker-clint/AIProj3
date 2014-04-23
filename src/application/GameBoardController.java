@@ -139,7 +139,7 @@ public class GameBoardController implements Initializable, ControlledScreen {
 	void startPressed(ActionEvent event){
 		if(!reseting){
 			System.out.println("Starting without reset");
-			
+			Main.MACHINE = new AI();
 			if(getInput()){
 				Main.MACHINE.setAlpha(alpha);
 				Main.MACHINE.setGamma(gamma);
@@ -180,6 +180,10 @@ public class GameBoardController implements Initializable, ControlledScreen {
 				updateBoard();
 				startLoop();
 				started = true;
+				reseting = false;
+				runs = 0;
+				counter = 0;
+				clock = 0;
 			} 
 		}
 	}
@@ -297,6 +301,7 @@ public class GameBoardController implements Initializable, ControlledScreen {
 			pauseButton.setVisible(false);
 			stepButton.setVisible(false);
 			started = false;
+			reseting = true;
 		}
 	}
 	
@@ -366,37 +371,7 @@ public class GameBoardController implements Initializable, ControlledScreen {
 		}, 0, 1);
 	}
 	
-	void loadMap(){
-		//start file load process
-		//display file name in message log
-		//show send message button
-		
-		String fileNameString = "";
-		File file = fileChooser.showOpenDialog(Main.PRIMARY_STAGE);
-		if (file != null) {
-			//openFile(file);
-			fileNameString = file.getAbsolutePath();
-			System.out.println("filename = " + fileNameString);
-			if (fileNameString != null){
-				SavedMap map = SavedMap.loadMap(fileNameString);
-				reset();
-				started = true;
-				paused = true;
-				paused = true;
-				stepping = false;
-				stepButton.setVisible(true);
-				buildColorTable();
-				pauseButton.setVisible(true);
-				startButton.setVisible(false);
-				stopButton.setVisible(true);
-				stepButton.setVisible(false);
-				speedButton.setVisible(true);
-				initLoadedMap(map);
-			}
-		}
-		Main.PRIMARY_STAGE.requestFocus();
-		Main.POPUP_WINDOW.messageBoxStage.close();
-	}
+	
 	
 	void saveMap(String fileName){
 		SavedMap map = new SavedMap(lambda, lambdaDecay, reward, rewardDecay, alpha, gamma, seedMin, seedMax, seedReward,
@@ -560,8 +535,40 @@ public class GameBoardController implements Initializable, ControlledScreen {
 		pauseButton.setVisible(false);
 		stepButton.setVisible(false);
 		stopButton.setVisible(false);
+		resetButton.setVisible(false);
 	}
 	
+	
+	void loadMap(){
+		//start file load process
+		//display file name in message log
+		//show send message button
+		
+		String fileNameString = "";
+		File file = fileChooser.showOpenDialog(Main.PRIMARY_STAGE);
+		if (file != null) {
+			//openFile(file);
+			fileNameString = file.getAbsolutePath();
+			System.out.println("filename = " + fileNameString);
+			if (fileNameString != null){
+				SavedMap map = SavedMap.loadMap(fileNameString);
+				reset();
+				buildColorTable();
+				started = true;
+				paused = true;
+				stepping = false;
+				reseting = false;
+				stepButton.setVisible(true);
+				pauseButton.setVisible(true);
+				startButton.setVisible(false);
+				stopButton.setVisible(true);
+				resetButton.setVisible(false);
+				initLoadedMap(map);
+			}
+		}
+		Main.PRIMARY_STAGE.requestFocus();
+		Main.POPUP_WINDOW.messageBoxStage.close();
+	}
 	void initLoadedMap(SavedMap map){
 		paused = true;
 		goalX = map.getGoalX();

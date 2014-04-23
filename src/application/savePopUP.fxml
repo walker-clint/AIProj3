@@ -6,9 +6,9 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.paint.*?>
 <?import javafx.scene.text.*?>
-<?scenebuilder-background-color 0xffb800ff?>
+<?scenebuilder-background-color 0xffc633ff?>
 
-<AnchorPane id="AnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="200.0" prefWidth="300.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="application.MessageBoxController">
+<AnchorPane id="AnchorPane" fx:id="rootScreen" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="200.0" prefWidth="300.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="application.MessageBoxController">
   <children>
     <Pane id="popup" layoutX="0.0" layoutY="0.0" prefHeight="200.0" prefWidth="300.0">
       <children>
@@ -24,9 +24,9 @@
         </Label>
         <Button fx:id="yesButton" layoutX="95.0" layoutY="90.0" mnemonicParsing="false" onAction="#yesButtonPressed" text="Yes" />
         <Button fx:id="noButton" layoutX="160.0" layoutY="90.0" mnemonicParsing="false" onAction="#noButtonPressed" text="No" />
-        <Button fx:id="popupSaveMapButton" layoutX="114.0" layoutY="165.0" mnemonicParsing="false" onAction="#saveMapButtonPressed" text="Save Map" />
-        <TextField id="popupSaveMapButton" fx:id="popupFileNameField" layoutX="50.0" layoutY="136.0" prefWidth="200.0" />
-        <Label layoutX="63.0" layoutY="120.0" text="Enter File Name To Save Map As:" />
+        <Button fx:id="popupSaveMapButton" layoutX="114.0" layoutY="165.0" mnemonicParsing="false" onAction="#saveMapButtonPressed" text="Save Map" visible="false" />
+        <TextField id="popupSaveMapButton" fx:id="popupFileNameField" layoutX="50.0" layoutY="136.0" prefWidth="200.0" visible="false" />
+        <Label fx:id="fileNameLabel" layoutX="63.0" layoutY="120.0" text="Enter File Name To Save Map As:" visible="false" />
       </children>
     </Pane>
   </children>
