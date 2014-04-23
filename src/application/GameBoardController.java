@@ -2,20 +2,30 @@ package application;
 
 /*
  * 	Written by Clinton Walker 2014
- *  
+ *  Artificial Intelligence CS4523 Southern Polytechnic State University
+ *  Project 3
+ *  all rights reserved. 
  * */
 
 
+import java.io.File;
 import java.net.URL;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.LinkedList;
+import java.util.Random;
 import java.util.ResourceBundle;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import Model.AI;
+import model.AI;
+import model.SavedMap;
+import model.Move;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -25,117 +35,189 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.RectangleBuilder;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 
 public class GameBoardController implements Initializable, ControlledScreen {
 	
 	//==============================================================================
 	// variables
 	
-	ScreensController 		myController;
+	ScreensController 			myController;
+		
+	@FXML 	AnchorPane			rootScreen;
+	@FXML	Pane				pane;
+	@FXML 	Pane				popup;
 	
-	@FXML 	AnchorPane		rootScreen;
-	@FXML	Pane			pane;
+	@FXML	Label				resultQCompleteLabel;
+	@FXML	Label				currentQ0Label;
+	@FXML	Label				currentRewardLabel;
+	@FXML	Label				nextStateQLabel;
+	@FXML	Label				currentQ1Label;
+	@FXML	Label				startXLabel;
+	@FXML	Label				startYLabel;
+	@FXML	Label				runTimerLabel;
+	@FXML	Label				numberOfRunsLabel;
 	
-	@FXML	Label			resultQCompleteLabel;
-	@FXML	Label			currentQ0Label;
-	@FXML	Label			currentRewardLabel;
-	@FXML	Label			nextStateQLabel;
-	@FXML	Label			currentQ1Label;
-	@FXML	Label			startXLabel;
-	@FXML	Label			startYLabel;
-	@FXML	Label			runTimerLabel;
-	@FXML	Label			numberOfRunsLabel;
+	@FXML	TextField			lambdaField;
+	@FXML	TextField			lambdaDecayField;
+	@FXML	TextField			rewardField;
+	@FXML	TextField			rewardDecayField;
+	@FXML	TextField			alphaField;
+	@FXML	TextField			gammaField;
+	@FXML	TextField			startXField;
+	@FXML	TextField			startYField;
+	@FXML	TextField			goalXField;
+	@FXML	TextField			goalYField;
+	@FXML	TextField			rotateField;
+	@FXML	TextField			XField;
+	@FXML	TextField			YField;
+	@FXML	TextField			SField;
+	@FXML	TextField			fileNameField;
+	@FXML	TextField			seedMaxField;
+	@FXML	TextField			seedMinField;
 	
-	@FXML	TextField		lambdaField;
-	@FXML	TextField		lambdaDecayField;
-	@FXML	TextField		rewardField;
-	@FXML	TextField		rewardDecayField;
-	@FXML	TextField		alphaField;
-	@FXML	TextField		gammaField;
-	@FXML	TextField		startXField;
-	@FXML	TextField		startYField;
-	@FXML	TextField		goalXField;
-	@FXML	TextField		goalYField;
-	@FXML	TextField		rotateField;
-	@FXML	TextField		XField;
-	@FXML	TextField		YField;
-	@FXML	TextField		SField;
+		
+	@FXML	Button				pauseButton;
+	@FXML	Button				stepButton;
+	@FXML	Button				random_FixedStartButton;
+	@FXML	Button				startButton;
+	@FXML	Button				stopButton;
+	@FXML	Button				exitButton;
+	@FXML	Button				speedButton;
+	@FXML	Button				saveMapButton;
+	@FXML	Button				loadMapButton;
+	@FXML	Button				resetButton;
+
 	
-	@FXML	Button			pauseButton;
-	@FXML	Button			stepButton;
-	@FXML	Button			random_FixedStartButton;
-	@FXML	Button			startButton;
-	@FXML	Button			stopButton;
-	@FXML	Button			exitButton;
-	@FXML	Button			speedButton;
-	
-	@FXML 	Rectangle		newRectangle;
+	@FXML 	Rectangle			newRectangle;
 	
 	
-	private	Timer 			timer;
-	private double			lambda,
-							lambdaDecay,
-							reward,
-							rewardDecay,
-							alpha,
-							gamma,
-							X,
-							Y,
-							seedMin,
-							seedMax,
-							seedReward;
-    private int				startX,
-							startY,
-							goalX,
-							goalY,
-							counter				= 0,
-							clock				= 0,
-							speed				= 500,
-							speedCounter 		= 0,
-							runs				= 0,
-							r					= 0,
-							c					= 0;
-	private String			input;
-	private boolean			random 				= true,
-							started				= false,
-							paused 				= false,
-							stepping 			= false;
+	private	Timer 				timer;
+	private double				lambda,
+								lambdaDecay,
+								reward,
+								rewardDecay,
+								alpha,
+								gamma,
+								offsetX				= 20,
+								offsetY				= 30,
+								X,
+								Y,
+								seedMin,
+								seedMax,
+								seedReward          = 0;
+    private int					startX,
+								startY,
+								goalX,
+								goalY,
+								counter				= 0,
+								clock				= 0,
+								speed				= 500,
+								speedCounter 		= 0,
+								runs				= 0;
+	private String				input;
+	private boolean				random 				= true,
+								started				= false,
+								paused 				= false,
+								stepping 			= false,
+								reseting			= true;
+	public	boolean				waiting				= true;
 							
-	private Rectangle[][]	rectangles;
-	public 	Polygon[][]		arrows;
-	private Pane 			content;
+	private Rectangle[][]		rectangles;
+	public 	Polygon[][]			arrows;
+	private FileChooser			fileChooser 		= new FileChooser();
+	public 	Stage				popupStage;
+	public  Scene				popupScene;
+	Dictionary<String, Color> 	colorTable 			= new Hashtable<String, Color>();
+	private LinkedList<Move> 	moves				= new LinkedList<>();
 	
 	//==============================================================================
 	// FXML Methods
 	
 	@FXML
 	void startPressed(ActionEvent event){
-		if(started){
-		} else {
-			if (getInput()){
+		if(!reseting){
+			System.out.println("Starting without reset");
+			
+			if(getInput()){
+				Main.MACHINE.setAlpha(alpha);
+				Main.MACHINE.setGamma(gamma);
+				Main.MACHINE.setGoalX(goalX);
+				Main.MACHINE.setGoalY(goalY);
+				Main.MACHINE.setGoalReward(reward);
+				Main.MACHINE.setLambda(lambda);
+				Main.MACHINE.setLambdaDecay(lambdaDecay);
+				Main.MACHINE.setRewardDecay(rewardDecay);
+				paused = false;
 				pauseButton.setVisible(true);
 				startButton.setVisible(false);
 				stopButton.setVisible(true);
 				stepButton.setVisible(false);
-				speedButton.setVisible(true);
-				Main.machine = new AI(goalX, goalY, seedMin, seedMax, alpha, lambda, lambdaDecay, seedReward, reward);
-				Main.machine.seedQTable();
+				resetButton.setVisible(false);
+				started = true;
+				pausePressed(event);
+			}
+			
+		} else {
+			if (getInput()){
+				System.out.println("Starting with reset");
+				buildColorTable();
+				pauseButton.setVisible(true);
+				startButton.setVisible(false);
+				stopButton.setVisible(true);
+				stepButton.setVisible(false);
+				resetButton.setVisible(false);
+				Main.MACHINE = new AI(goalX, goalY, seedMin, seedMax, alpha, gamma, lambda, lambdaDecay, seedReward, 0, rewardDecay);
+				Main.MACHINE.seedQTable();
+				makeWalls();
+				Main.MACHINE.initQTableAndBoard();
+				Main.MACHINE.qtable[goalX][goalY].setReward(reward);
+				if(random){
+					setStartPos();
+				}
 				buildArrows();
+				updateBoard();
 				startLoop();
 				started = true;
 			} 
 		}
 	}
 	
+	@FXML
+	void saveMapPressed(ActionEvent event){
+		if (fileNameField.getText().equals("") || fileNameField.getText().equals("Enter File Name")){
+			fileNameField.requestFocus();
+			fileNameField.setText("Enter File Name");
+		} else {
+			saveMap(fileNameField.getText());
+		}
+	}
+	
+	@FXML
+	void loadMapPressed(ActionEvent event){
+		try {
+		 	Main.POPUP_WINDOW.showMessageBox(Main.PRIMARY_STAGE); 
+		 	System.out.println("Load map in try screen name " + Main.SAVE_POPUP_FXML);
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			System.out.println("Load map in catch screen name " + Main.SAVE_POPUP_FXML);
+		}
+		
+	}
+	
 	@FXML 
 	void buildRects(ActionEvent event){
+		if(rectangles != null){
+			deleteRectangles();
+		}
 		buildRectangles();
 	}
 	
 	@FXML
 	void buildArrs(ActionEvent event){
 		if (arrows != null){
-			deleteArrows(event);
+			deleteArrows();
 		}
 		
 		buildArrows();
@@ -191,9 +273,24 @@ public class GameBoardController implements Initializable, ControlledScreen {
 		}
 	}
 	
-	@FXML
+	@FXML 
 	public void stopPressed(ActionEvent event){
-		if(started){
+		if (started){
+			pausePressed(event);
+			startButton.setVisible(true);
+			stopButton.setVisible(false);
+			pauseButton.setVisible(false);
+			stepButton.setVisible(false);
+			started = false;
+			resetButton.setVisible(true);
+			reseting = false;
+		}
+		
+	}
+	
+	@FXML
+	public void resetPressed(ActionEvent event){
+		if(!started){
 			reset();
 			startButton.setVisible(true);
 			stopButton.setVisible(false);
@@ -207,8 +304,8 @@ public class GameBoardController implements Initializable, ControlledScreen {
 	public void exitPressed(ActionEvent event){
 		reset();
 		myController.setScreen(Main.START_SCREEN);	
-		Main.PRIMARYSTAGE_STAGE.setHeight(420);
-		Main.PRIMARYSTAGE_STAGE.setWidth(815);
+		Main.PRIMARY_STAGE.setHeight(420);
+		Main.PRIMARY_STAGE.setWidth(815);
 	}
 	
 	@FXML
@@ -260,15 +357,8 @@ public class GameBoardController implements Initializable, ControlledScreen {
 								stepping = false;
 							}
 							numberOfRunsLabel.setText("" + runs);
-							rectangles[r][c].setFill(Color.RED);
-							r++;
-							if (r >= Main.ROWS){
-								r = 0;
-								c++;
-							}
-							if (c >= Main.COLUMNS){
-								c = 0;
-							}
+							//Move nextMove = new Move(X, Y);
+							//moves.add(e)
 						}
 					}
 				});
@@ -276,38 +366,69 @@ public class GameBoardController implements Initializable, ControlledScreen {
 		}, 0, 1);
 	}
 	
-	void setQtableColors(){
-		X = 5;
-		Y = 5;
-		for (int c = 0; c < Main.COLUMNS; c++){
-			for (int r = 0; r < Main.ROWS; r++){
-				Main.machine.setColor(r, c, (Color)rectangles[r][c].getFill());
+	void loadMap(){
+		//start file load process
+		//display file name in message log
+		//show send message button
+		
+		String fileNameString = "";
+		File file = fileChooser.showOpenDialog(Main.PRIMARY_STAGE);
+		if (file != null) {
+			//openFile(file);
+			fileNameString = file.getAbsolutePath();
+			System.out.println("filename = " + fileNameString);
+			if (fileNameString != null){
+				SavedMap map = SavedMap.loadMap(fileNameString);
+				reset();
+				started = true;
+				paused = true;
+				paused = true;
+				stepping = false;
+				stepButton.setVisible(true);
+				buildColorTable();
+				pauseButton.setVisible(true);
+				startButton.setVisible(false);
+				stopButton.setVisible(true);
+				stepButton.setVisible(false);
+				speedButton.setVisible(true);
+				initLoadedMap(map);
 			}
 		}
+		Main.PRIMARY_STAGE.requestFocus();
+		Main.POPUP_WINDOW.messageBoxStage.close();
+	}
+	
+	void saveMap(String fileName){
+		SavedMap map = new SavedMap(lambda, lambdaDecay, reward, rewardDecay, alpha, gamma, seedMin, seedMax, seedReward,
+					startX, startY, goalX, goalY, counter, clock, runs, Main.MACHINE.qtable);
+		map.saveMap(map, fileName);
 	}
 	
 	void updateBoard(){
-		X = Double.parseDouble(XField.getText());
-		Y = Double.parseDouble(YField.getText());
-		double s = Double.parseDouble(SField.getText());
-		double rotation = Double.parseDouble(rotateField.getText());
+		//X = Double.parseDouble(XField.getText());
+		//Y = Double.parseDouble(YField.getText());
+		//double s = Double.parseDouble(SField.getText());
+		//double rotation = Double.parseDouble(rotateField.getText());
+		System.out.println("UPDATE BOARD START");
 		for (int c = 0; c < Main.COLUMNS; c++){
 			for (int r = 0; r < Main.ROWS; r++){
 				if (goalX == r && goalY == c){
-					Main.machine.setColor(r, c, (Color)rectangles[r][c].getFill());
+					System.out.println("QTable[" + r + "][" + c + "] " + Main.MACHINE.qtable[r][c].toString());
+				} else if ( Main.MACHINE.qtable[r][c].isWall()){
+					System.out.println("QTable[" + r + "][" + c + "] " + Main.MACHINE.qtable[r][c].toString());
 				} else {
-					arrows[r][c].setRotate(Main.machine.qtable[r][c].getDirection());
-					arrows[r][c].setScaleX(.5 * Main.machine.qtable[r][c].getScaleFactor());
-					arrows[r][c].setScaleY(.5 * Main.machine.qtable[r][c].getScaleFactor());
-					arrows[r][c].setFill(Main.machine.qtable[r][c].getColor());
+					System.out.println("QTable[" + r + "][" + c + "] " + Main.MACHINE.qtable[r][c].toString());
 					
-					
-					arrows[r][c].setLayoutX((35 * r) + X); //remove after testing
-					arrows[r][c].setLayoutY((35 * c) + Y); //remove after testing
+					arrows[r][c].setRotate(Main.MACHINE.qtable[r][c].getDirection());
+					arrows[r][c].setScaleX(Main.SCALE_ADJUSTMENT_FACTOR * Main.MACHINE.qtable[r][c].getScaleFactorX());
+					arrows[r][c].setScaleY(Main.SCALE_ADJUSTMENT_FACTOR * Main.MACHINE.qtable[r][c].getScaleFactorY());
+					arrows[r][c].setLayoutX((35 * r) + offsetX); //remove after testing
+					arrows[r][c].setLayoutY((35 * c) + offsetY); //remove after testing
 					
 				}
 			}
 		}
+		System.out.println("UPDATE BOARD STOP");
 	}
 	
 	void buildRectangles(){
@@ -333,14 +454,14 @@ public class GameBoardController implements Initializable, ControlledScreen {
 	}
 	
 	void buildArrows(){
-		X = Double.parseDouble(XField.getText());
-		Y = Double.parseDouble(YField.getText());
+		//X = Double.parseDouble(XField.getText());
+		//Y = Double.parseDouble(YField.getText());
 		//X = 20;
 		//Y = 30;
 		double starX = -14.0;
 		double starY = -113.0;
-		double s = Double.parseDouble(SField.getText());
-		double rotation = Double.parseDouble(rotateField.getText());
+		//double s = Double.parseDouble(SField.getText());
+		//double rotation = Double.parseDouble(rotateField.getText());
 		arrows = new Polygon[Main.ROWS][Main.COLUMNS];
 		for (int c = 0; c < Main.COLUMNS; c++){
 			for (int r = 0; r < Main.ROWS; r++){
@@ -349,34 +470,56 @@ public class GameBoardController implements Initializable, ControlledScreen {
 					arrows[r][c].getPoints().addAll(new Double[] {35.0, 120.5, 37.9, 129.1, 46.9, 129.1, 39.7, 134.5, 42.3, 143.1,
 							35.0, 139.0, 27.7, 143.1, 30.3, 134.5, 23.1, 129.1, 32.1, 129.1});
 					arrows[r][c].setFill(Color.GOLD);
-					arrows[r][c].setRotate(rotation);
-					arrows[r][c].setScaleX(1 * s);
-					arrows[r][c].setScaleY(1 * s );
+					arrows[r][c].setRotate(0);
+					arrows[r][c].setScaleX(1);
+					arrows[r][c].setScaleY(1);
 					arrows[r][c].setLayoutX((35 * r) + starX);
 					arrows[r][c].setLayoutY((35 * c) + starY);
 					rectangles[r][c].setFill(Color.CORNFLOWERBLUE);
-					} else {
+				} else if(startX == r && startY == c){
 					arrows[r][c] = new Polygon();
 					arrows[r][c].getPoints().addAll(new Double[] {-40.0, 40.0, 40.0, 40.0, 0.0, -60.0});
 					arrows[r][c].setFill(Color.BLACK);
-					arrows[r][c].setRotate(rotation);
-					arrows[r][c].setScaleX(.15 * s);
-					arrows[r][c].setScaleY(.15 * s );
-					arrows[r][c].setLayoutX((35 * r) + X);
-					arrows[r][c].setLayoutY((35 * c) + Y);
+					arrows[r][c].setRotate(0);
+					arrows[r][c].setScaleX(.15 * Main.SCALE_ADJUSTMENT_FACTOR);
+					arrows[r][c].setScaleY(.15 * Main.SCALE_ADJUSTMENT_FACTOR);
+					arrows[r][c].setLayoutX((35 * r) + offsetX);
+					arrows[r][c].setLayoutY((35 * c) + offsetY);
+					rectangles[r][c].setFill(Color.BLUEVIOLET);
+				} else if (Main.MACHINE.qtable[r][c].isWall()){
+					//do not make an arrow here
+					rectangles[r][c].setFill(colorTable.get(Main.MACHINE.qtable[r][c].getColor()));
+				} else {	
+					arrows[r][c] = new Polygon();
+					arrows[r][c].getPoints().addAll(new Double[] {-40.0, 40.0, 40.0, 40.0, 0.0, -60.0});
+					arrows[r][c].setFill(Color.BLACK);
+					arrows[r][c].setRotate(0);
+					arrows[r][c].setScaleX(.15 * Main.SCALE_ADJUSTMENT_FACTOR);
+					arrows[r][c].setScaleY(.15 * Main.SCALE_ADJUSTMENT_FACTOR );
+					arrows[r][c].setLayoutX((35 * r) + offsetX);
+					arrows[r][c].setLayoutY((35 * c) + offsetY);
 				}
-				pane.getChildren().add(arrows[r][c]);
+				if (arrows[r][c] != null){
+					pane.getChildren().add(arrows[r][c]);
+				}
 			}
 		}
 		
 	}
 	
-	void deleteArrows(ActionEvent event){
-		for (int c = 0; c < Main.COLUMNS; c++){
-			for (int r = 0; r < Main.ROWS; r++){
-			
-				pane.getChildren().removeAll(arrows[r][c]);
+	void deleteArrows(){
+		if (arrows != null){
+			for (int c = 0; c < Main.COLUMNS; c++){
+				for (int r = 0; r < Main.ROWS; r++){
+				
+					pane.getChildren().removeAll(arrows[r][c]);
+				}
 			}
+		}
+	}
+	
+	void deleteRectangles(){
+		if (rectangles != null){
 		}
 	}
 	
@@ -388,9 +531,94 @@ public class GameBoardController implements Initializable, ControlledScreen {
 			timer.cancel();
 			timer = null;
 		}
+		if (Main.MACHINE != null){
+			Main.MACHINE = null;
+		}
+		deleteArrows();
+		deleteRectangles();
+		buildRectangles();
+		lambda = 0;
+		lambdaField.setText("0");
+		lambdaDecay = 0;
+		lambdaDecayField.setText("0");
+		reward = 0;
+		rewardField.setText("0");
+		rewardDecay = 0;
+		rewardDecayField.setText("0");
+		alpha = 0;
+		alphaField.setText("0");
+		gamma = 0;
+		gammaField.setText("0");
+		goalX = 0;
+		goalXField.setText("0");
+		goalY = 0;
+		goalYField.setText("0");
+		started = false;
+		startButton.setVisible(true);
+		paused= false;
+		stepping = false;
+		pauseButton.setVisible(false);
+		stepButton.setVisible(false);
+		stopButton.setVisible(false);
+	}
+	
+	void initLoadedMap(SavedMap map){
+		paused = true;
+		goalX = map.getGoalX();
+		goalY = map.getGoalY();
+		seedMin = map.getSeedMin();
+		seedMax = map.getSeedMax();
+		alpha = map.getAlpha();
+		gamma = map.getGamma();
+		lambda = map.getLambda();
+		lambdaDecay = map.getLambdaDecay();
+		seedReward = map.getSeedReward();
+		reward = map.getReward();
+		counter = map.getCounter();
+		clock = map.getClock();
+		startX = map.getStartX();
+		startY = map.getStartY();
+		runs = map.getRuns();
+		goalXField.setText(goalX + "");
+		goalYField.setText(goalY + "");
+		alphaField.setText(alpha + "");
+		gammaField.setText(gamma + "");
+		lambdaField.setText(lambda + "");
+		lambdaDecayField.setText(lambdaDecay + "");
+		rewardField.setText(reward + "");
+		rewardDecayField.setText(rewardDecay +"");
+		runTimerLabel.setText(clock + "");
+		numberOfRunsLabel.setText(runs + "");
+		
+		Main.MACHINE = new AI(goalX, goalY, seedMin, seedMax, alpha, gamma, lambda, lambdaDecay, seedReward, reward, rewardDecay);
+		for (int r = 0; r < Main.ROWS; r++){
+			for (int c = 0; c < Main.COLUMNS; c++){
+				Main.MACHINE.qtable[r][c] = map.getQtable()[r][c];
+			}
+		}
+		buildArrows();
+		updateBoard();
+		pauseButton.requestFocus();
+		startLoop();
 	}
 	
 	boolean getInput(){
+		
+		input = seedMinField.getText();
+		try {
+			seedMin = Double.parseDouble(input);
+		} catch (Exception e) {
+			seedMinField.requestFocus();
+			return false;
+		}
+		input = seedMaxField.getText();
+		try {
+			seedMax = Double.parseDouble(input);
+		} catch (Exception e) {
+			seedMaxField.requestFocus();
+			return false;
+		}
+		
 		//get lambda
 		input = lambdaField.getText();
 		try {
@@ -463,7 +691,7 @@ public class GameBoardController implements Initializable, ControlledScreen {
 				startYField.requestFocus();
 				return false;
 			}
-		}
+		} 
 		// get goal position
 		input = goalXField.getText();
 		try {
@@ -490,26 +718,92 @@ public class GameBoardController implements Initializable, ControlledScreen {
 		return true;
 	}
 	
+	public void makeWalls(){
+		int blockX, blockY;
+		int numBlocks = (int)(0.1 * (Main.COLUMNS * Main.ROWS));
+		System.out.println("the number of blocks = " + numBlocks);
+		for (int i = 0; i < numBlocks; i++){
+			Random num = new Random();
+			
+			blockX = num.nextInt(Main.ROWS);
+			blockY = num.nextInt(Main.COLUMNS);
+			
+			if(Main.MACHINE.qtable[blockX][blockY].isGoal() || Main.MACHINE.qtable[blockX][blockY].isWall()){
+				--i;
+			} else {
+				
+				Main.MACHINE.qtable[blockX][blockY].setWall(true);
+				Main.MACHINE.qtable[blockX][blockY].setColor("DARKGREY");
+				rectangles[blockX][blockY].setFill(colorTable.get(Color.DARKGREY));
+				System.out.println("blockX: " + blockX + "  blockY: " + blockY + "isWall: " + Main.MACHINE.qtable[blockX][blockY].isWall() + " Color: " +  Main.MACHINE.qtable[blockX][blockY].getColor());
+			}
+		}
+	}
+	
+	private void setStartPos() {
+		Random num = new Random();
+		boolean settingStartPos = true;
+		while (settingStartPos){
+			startX = num.nextInt(Main.ROWS);
+			startY = num.nextInt(Main.COLUMNS);
+			System.out.println("startX: " + startX + "  startY: " + startY);
+			if(!Main.MACHINE.qtable[startX][startY].isGoal() || !Main.MACHINE.qtable[startX][startY].isWall()){
+				Main.MACHINE.qtable[startX][startY].setColor("CORNFLOWERBLUE");
+				settingStartPos = false;
+			}
+		}
+	}
+	
+	private void buildColorTable(){
+		colorTable.put("DARKGREY", Color.DARKGREY);
+		colorTable.put("BLACK", Color.BLACK);
+		colorTable.put("LIGHTGRAY", Color.LIGHTGRAY);
+		colorTable.put("GOLD", Color.GOLD);
+		colorTable.put("RED", Color.RED);
+		colorTable.put("CORNFLOWERBLUE", Color.CORNFLOWERBLUE);
+		colorTable.put("BLUEVIOLET", Color.BLUEVIOLET);
+		System.out.println("DARKGREY= " + "DARKGREY" + " from dictionary: " + colorTable.get("DARKGREY"));
+		System.out.println("BLACK= " + "BLACK" + " from dictionary: " + colorTable.get("BLACK"));
+		System.out.println("LIGHTGRAY= " + "LIGHTGRAY" + " from dictionary: " + colorTable.get("LIGHTGRAY"));
+		System.out.println("GOLD= " + "GOLD" + " from dictionary: " + colorTable.get("GOLD"));
+		System.out.println("RED= " + "RED" + " from dictionary: " + colorTable.get("RED"));
+		System.out.println("CORNFLOWERBLUE= " + "CORNFLOWERBLUE" + " from dictionary: " + colorTable.get("CORNFLOWERBLUE"));
+		System.out.println("BLUEVIOLET= " + "BLUEVIOLET" + " from dictionary: " + colorTable.get("BLUEVIOLET"));
+	}
+	
 	//==============================================================================
 	// getters and setters
 	
-	
-	
-	
-	
-	
-	
+	public boolean isRandom() {
+		return random;
+	}
+
+	public void setRandom(boolean random) {
+		this.random = random;
+	}
+	public double getReward() {
+		return reward;
+	}
+
+	public void setReward(double reward) {
+		this.reward = reward;
+	}
+
 	//==============================================================================
 	@Override
 	public void setScreenParent(ScreensController screenPage) {
 		myController = screenPage;
 	}
 
+	
+
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		rootScreen.setStyle("-fx-background-color: beige");
 		Main.GBC = this;
 		buildRectangles();
+		seedMinField.requestFocus();
+		Main.PRIMARY_STAGE.setY(10);
 	}
 
 }
