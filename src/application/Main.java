@@ -1,16 +1,15 @@
 package application;
 	
 /*
+ /*
  * 	Written by Clinton Walker 2014
+ *  Artificial Intelligence CS4523 Southern Polytechnic State University
+ *  Project 3
+ *  all rights reserved. 
  * */
-
 import java.io.File;
 import java.io.IOException;
-
-import Model.AI;
-
-import com.sun.org.apache.xalan.internal.xsltc.dom.AbsoluteIterator;
-
+import model.AI;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import javafx.scene.Group;
@@ -24,21 +23,24 @@ public class Main extends Application {
 	final 	static 	String 						START_SCREEN_FXML		= "StartScreen.fxml";
 	final 	static 	String 						GAME_BOARD 				= "GameBoard";
 	final 	static 	String 						GAME_BOARD_FXML			= "GameBoard.fxml";
+	final	static	String						SAVE_POPUP_FXML			= "savePopUP.fxml";
 	public	static	StartScreenController		SSC;
 	public	static 	GameBoardController			GBC;
-	public  static	String						FILEPATH;
+	public  static	String						FILE_PATH;
 	public  static  int							ROWS					= 20;
 	public  static  int							COLUMNS					= 20;
-			static	Stage						PRIMARYSTAGE_STAGE;
-			static  Scene						mainScene;
-			static	Group						root;
-			static  AI 							machine;
+	public  static  double						SCALE_ADJUSTMENT_FACTOR	= 1;
+	public  static  MessageBoxController		POPUP_WINDOW			= new MessageBoxController();
+			static	Stage						PRIMARY_STAGE;
+			static  Scene						MAIN_SCENE;
+			static	Group						ROOT;
+			static  AI 							MACHINE;
 	
 	//==============================================================================
 			
 	@Override
 	public void start(Stage primaryStage) {
-		PRIMARYSTAGE_STAGE = primaryStage;
+		PRIMARY_STAGE = primaryStage;
 		
 		boolean startLoad, gameLoad;
 		ScreensController mainContainer = new ScreensController();
@@ -51,13 +53,13 @@ public class Main extends Application {
 		System.out.println("Start loaded? " + startLoad + " gameloaded? " + gameLoad);
 		
 		mainContainer.setScreen(Main.START_SCREEN);
-		PRIMARYSTAGE_STAGE.setHeight(420);
-		PRIMARYSTAGE_STAGE.setWidth(800);
+		PRIMARY_STAGE.setHeight(420);
+		PRIMARY_STAGE.setWidth(800);
 		//PRIMARYSTAGE_STAGE.setResizable(false);
-		root = new Group();
-		root.getChildren().addAll(mainContainer);
-		Scene scene = new Scene(root);
-		mainScene = scene;
+		ROOT = new Group();
+		ROOT.getChildren().addAll(mainContainer);
+		Scene scene = new Scene(ROOT);
+		MAIN_SCENE = scene;
 		primaryStage.setScene(scene);
 		primaryStage.show();
 		
@@ -66,13 +68,13 @@ public class Main extends Application {
 			System.out.println("Current dir : " + file1.getCanonicalPath());
 			String path = file1.getCanonicalPath();
 			System.out.println("the path is " + path);
-			FILEPATH = path;
+			FILE_PATH = path;
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			System.out.println("problem getting canonical path");
 		}
 		
-		machine = new AI();
+		MACHINE = new AI();
 		
 		
 	}
