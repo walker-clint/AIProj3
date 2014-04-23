@@ -1,9 +1,10 @@
 package application;
 
 /*
- *  Written by Clinton Walker 2014
- *  
- *  
+ * 	Written by Clinton Walker 2014
+ *  Artificial Intelligence CS4523 Southern Polytechnic State University
+ *  Project 3
+ *  all rights reserved. 
  * */
 
 import java.net.URL;
@@ -28,12 +29,12 @@ public class StartScreenController implements Initializable, ControlledScreen {
 	@FXML
 	void startGameButtonPressed(ActionEvent event){
 		myController.setScreen(Main.GAME_BOARD);	
-		Main.PRIMARYSTAGE_STAGE.setHeight(910);
-		Main.PRIMARYSTAGE_STAGE.setWidth(1000);
+		Main.PRIMARY_STAGE.setHeight(910);
+		Main.PRIMARY_STAGE.setWidth(1000);
 	}
 	@FXML
 	public void exit(ActionEvent event){
-		Main.PRIMARYSTAGE_STAGE.close();
+		Main.PRIMARY_STAGE.close();
 	}
 	
 	//==============================================================================
