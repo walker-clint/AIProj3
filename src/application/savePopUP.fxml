@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.paint.*?>
+<?import javafx.scene.text.*?>
+<?scenebuilder-background-color 0xffb800ff?>
+
+<AnchorPane id="AnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="200.0" prefWidth="300.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="application.MessageBoxController">
+  <children>
+    <Pane id="popup" layoutX="0.0" layoutY="0.0" prefHeight="200.0" prefWidth="300.0">
+      <children>
+        <Label layoutX="14.0" layoutY="39.0" prefHeight="41.0" prefWidth="272.0" text="Loading this game will delete the current game state. Would you like to save the current state?" textAlignment="CENTER" wrapText="true">
+          <font>
+            <Font size="12.0" />
+          </font>
+        </Label>
+        <Label layoutX="112.0" layoutY="9.0" text="Warning" textFill="RED">
+          <font>
+            <Font size="20.0" />
+          </font>
+        </Label>
+        <Button fx:id="yesButton" layoutX="95.0" layoutY="90.0" mnemonicParsing="false" onAction="#yesButtonPressed" text="Yes" />
+        <Button fx:id="noButton" layoutX="160.0" layoutY="90.0" mnemonicParsing="false" onAction="#noButtonPressed" text="No" />
+        <Button fx:id="popupSaveMapButton" layoutX="114.0" layoutY="165.0" mnemonicParsing="false" onAction="#saveMapButtonPressed" text="Save Map" />
+        <TextField id="popupSaveMapButton" fx:id="popupFileNameField" layoutX="50.0" layoutY="136.0" prefWidth="200.0" />
+        <Label layoutX="63.0" layoutY="120.0" text="Enter File Name To Save Map As:" />
+      </children>
+    </Pane>
+  </children>
+</AnchorPane>
