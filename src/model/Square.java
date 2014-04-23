@@ -1,4 +1,4 @@
-package Model;
+package model;
 
 /*
  *	Written by Clinton Walker 2014
@@ -6,19 +6,25 @@ package Model;
  *  Container cLass for holding the QMap information
  * */
 
-import javafx.scene.paint.Color;
+import java.io.Serializable;
 
-public class Square {
+public class Square implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	//==============================================================================
 	// variables
 	
 	private 	double			reward,
 								weight,
-								scaleFactor,
+								scaleFactorX,
+								scaleFactorY,
 								direction,
 								rotation;
-	private		boolean			isGoal;
-	private 	Color			color;
+	private		boolean			isGoal,
+								isWall;
+	private 	String			color;
 	
 	//==============================================================================
 	// constructors
@@ -26,16 +32,14 @@ public class Square {
 	public Square(){
 		reward = 0;
 		weight = 0;
-		scaleFactor = 1;
+		scaleFactorX = 1;
+		scaleFactorY = 1;
 		direction = 0;
 		isGoal = false;
-		color = Color.WHITE;
+		isWall = false;
+		color = "White";
 		rotation = 0.0;
 	}
-	
-	
-	
-	
 	
 	//==============================================================================
 	// getters and setters
@@ -52,11 +56,17 @@ public class Square {
 	public void setWeight(double weight) {
 		this.weight = weight;
 	}
-	public double getScaleFactor() {
-		return scaleFactor;
+	public double getScaleFactorX() {
+		return scaleFactorX;
 	}
-	public void setScaleFactor(double scaleFactor) {
-		this.scaleFactor = scaleFactor;
+	public void setScaleFactorX(double scaleFactorX) {
+		this.scaleFactorX = scaleFactorX;
+	}
+	public double getScaleFactorY() {
+		return scaleFactorY;
+	}
+	public void setScaleFactorY(double scaleFactorY) {
+		this.scaleFactorY = scaleFactorY;
 	}
 	public double getDirection() {
 		return direction;
@@ -70,10 +80,10 @@ public class Square {
 	public void setGoal(boolean isGoal) {
 		this.isGoal = isGoal;
 	}
-	public Color getColor() {
+	public String getColor() {
 		return color;
 	}
-	public void setColor(Color color) {
+	public void setColor(String color) {
 		this.color = color;
 	}
 	public double getRotation() {
@@ -82,21 +92,22 @@ public class Square {
 	public void setRotation(double rotation) {
 		this.rotation = rotation;
 	}
+	public boolean isWall() {
+		return isWall;
+	}
+	public void setWall(boolean isWall) {
+		this.isWall = isWall;
+	}
 	
 	
 	//==============================================================================
 	// methods
-	
-
-
-
-
 
 	@Override
 	public String toString() {
 		return "Square [reward=" + reward + ", weight=" + weight
-				+ ", scaleFactor=" + scaleFactor + ", direction=" + direction
-				+ ", isGoal=" + isGoal + ", color=" + color + "]";
+				+ ", scaleFactorX=" + scaleFactorX + ", scaleFactorY=" + scaleFactorY + ", direction=" + direction
+				+ ", isGoal=" + isGoal + ", isWall=" + isWall + ", color=" + color + "]";
 	}
 	
 					
