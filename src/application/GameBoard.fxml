@@ -15,7 +15,7 @@
         <Pane prefHeight="50.0" prefWidth="200.0" />
       </bottom>
       <center>
-        <Pane fx:id="pane" prefHeight="200.0" prefWidth="200.0" />
+        <Pane fx:id="pane" prefHeight="-1.0" prefWidth="200.0" />
       </center>
       <left>
         <Pane prefHeight="-1.0" prefWidth="100.0" BorderPane.alignment="TOP_LEFT">
@@ -35,21 +35,21 @@
               </font>
             </Label>
             <Label fx:id="numberOfRunsLabel" layoutX="25.0" layoutY="129.0" prefWidth="53.0" text="0" />
-            <Button layoutX="15.0" layoutY="287.0" mnemonicParsing="false" onAction="#buildRects" text="rectangles" />
-            <Button layoutX="25.0" layoutY="467.0" mnemonicParsing="false" onAction="#updateArrowsPressed" text="update" />
-            <TextField fx:id="rotateField" layoutX="25.0" layoutY="381.0" prefWidth="53.0" text="0" />
-            <Button layoutX="21.0" layoutY="314.0" mnemonicParsing="false" onAction="#buildArrs" text="arrows" />
-            <TextField id="rotateField" fx:id="XField" layoutX="24.0" layoutY="410.0" prefWidth="53.0" text="20" />
-            <TextField id="rotateField" fx:id="YField" layoutX="25.0" layoutY="438.0" prefWidth="53.0" text="30" />
-            <Label layoutX="15.0" layoutY="441.0" text="Y">
+            <Button layoutX="15.0" layoutY="287.0" mnemonicParsing="false" onAction="#buildRects" text="rectangles" visible="false" />
+            <Button layoutX="25.0" layoutY="467.0" mnemonicParsing="false" onAction="#updateArrowsPressed" text="update" visible="false" />
+            <TextField fx:id="rotateField" layoutX="25.0" layoutY="381.0" prefWidth="53.0" text="0" visible="false" />
+            <Button layoutX="21.0" layoutY="314.0" mnemonicParsing="false" onAction="#buildArrs" text="arrows" visible="false" />
+            <TextField id="rotateField" fx:id="XField" layoutX="25.0" layoutY="410.0" prefWidth="53.0" text="20" visible="false" />
+            <TextField id="rotateField" fx:id="YField" layoutX="25.0" layoutY="438.0" prefWidth="53.0" text="30" visible="false" />
+            <Label layoutX="15.0" layoutY="441.0" text="Y" visible="false">
               <font>
                 <Font name="System Bold" size="12.0" fx:id="x2" />
               </font>
             </Label>
-            <Label font="$x2" layoutX="15.0" layoutY="413.0" text="X" />
-            <Label font="$x2" layoutX="13.0" layoutY="384.0" text="R" />
-            <TextField id="rotateField" fx:id="SField" layoutX="27.0" layoutY="353.0" prefWidth="53.0" text="1" />
-            <Label font="$x2" layoutX="15.0" layoutY="356.0" text="S" />
+            <Label font="$x2" layoutX="15.0" layoutY="413.0" text="X" visible="false" />
+            <Label font="$x2" layoutX="13.0" layoutY="384.0" text="R" visible="false" />
+            <TextField id="rotateField" fx:id="SField" layoutX="27.0" layoutY="353.0" prefWidth="53.0" text="1" visible="false" />
+            <Label font="$x2" layoutX="15.0" layoutY="356.0" text="S" visible="false" />
             <Label layoutX="71.0" layoutY="-2.0" text="(0, 0)">
               <font>
                 <Font name="Arial" size="12.0" />
@@ -59,11 +59,21 @@
         </Pane>
       </left>
       <right>
-        <Pane prefHeight="200.0" prefWidth="190.0" />
+        <Pane prefHeight="-1.0" prefWidth="190.0">
+          <children>
+            <Button fx:id="saveMap" layoutX="102.0" layoutY="128.0" mnemonicParsing="false" onAction="#saveMapPressed" prefWidth="74.0" text="Save Map" />
+            <Button fx:id="loadMap" layoutX="102.0" layoutY="149.0" mnemonicParsing="false" onAction="#loadMapPressed" text="Load Map" />
+            <TextField fx:id="fileNameField" layoutX="14.0" layoutY="93.0" prefWidth="162.0" />
+            <Label layoutX="14.0" layoutY="77.0" text="File Name To Save As:" />
+            <Button fx:id="resetButton" layoutX="96.0" layoutY="15.0" mnemonicParsing="false" onAction="#resetPressed" prefHeight="41.9609375" prefWidth="70.0" text="Reset" visible="false" />
+          </children>
+        </Pane>
       </right>
       <top>
         <Pane prefHeight="150.0" prefWidth="1000.0">
           <children>
+            <TextField fx:id="seedMinField" layoutX="256.0" layoutY="20.0" prefWidth="50.0" text="0.001" />
+            <TextField fx:id="seedMaxField" layoutX="314.0" layoutY="20.0" prefWidth="50.0" text="0.005" />
             <Label layoutX="459.0" layoutY="50.0" text="Reward  =[            ]    +   decay [            ]">
               <font>
                 <Font name="Arial Bold" size="20.0" fx:id="x3" />
@@ -72,17 +82,17 @@
             <Label font="$x3" layoutX="110.0" layoutY="50.0" text="λ =[            ]    +   decay [            ]" />
             <Button fx:id="pauseButton" layoutX="14.0" layoutY="47.0" mnemonicParsing="false" onAction="#pausePressed" prefHeight="41.9609375" prefWidth="76.0" text="Pause" visible="false" />
             <Button fx:id="stepButton" layoutX="31.0" layoutY="95.0" mnemonicParsing="false" onAction="#stepPressed" prefHeight="26.6015625" prefWidth="56.000099999997474" text="Step" visible="false" />
-            <TextField fx:id="lambdaField" layoutX="146.0" layoutY="50.0" prefWidth="66.99997792968497" />
-            <TextField fx:id="lambdaDecayField" layoutX="339.0" layoutY="50.0" prefWidth="66.9998779296875" />
-            <TextField fx:id="rewardField" layoutX="561.0" layoutY="50.0" prefWidth="66.99985585937247" />
-            <TextField fx:id="rewardDecayField" layoutX="754.0" layoutY="50.0" prefWidth="66.9998779296875" />
+            <TextField fx:id="lambdaField" layoutX="146.0" layoutY="50.0" prefWidth="66.99997792968497" text="1" />
+            <TextField fx:id="lambdaDecayField" layoutX="339.0" layoutY="50.0" prefWidth="66.9998779296875" text="1" />
+            <TextField fx:id="rewardField" layoutX="561.0" layoutY="50.0" prefWidth="66.99985585937247" text="1" />
+            <TextField fx:id="rewardDecayField" layoutX="754.0" layoutY="50.0" prefWidth="66.9998779296875" text="1" />
             <Button fx:id="random_FixedStartButton" layoutX="775.0" layoutY="88.0" minHeight="15.960929052736901" mnemonicParsing="false" onAction="#setRandom" prefHeight="21.9609290527369" prefWidth="82.0" text="Random" />
             <TextField fx:id="startXField" layoutX="729.0" layoutY="113.0" prefWidth="42.0" visible="false" />
             <TextField fx:id="startYField" layoutX="793.0" layoutY="113.0" prefWidth="42.0" visible="false" />
-            <TextField fx:id="alphaField" layoutX="286.0" layoutY="109.0" prefWidth="42.0" />
-            <TextField fx:id="gammaField" layoutX="429.0" layoutY="109.0" prefWidth="50.0" />
-            <TextField fx:id="goalXField" layoutX="928.0" layoutY="39.0" prefWidth="42.0" />
-            <TextField fx:id="goalYField" layoutX="928.0" layoutY="61.0" prefWidth="42.0" />
+            <TextField fx:id="alphaField" layoutX="286.0" layoutY="109.0" prefWidth="42.0" text="1" />
+            <TextField fx:id="gammaField" layoutX="429.0" layoutY="109.0" prefWidth="50.0" text="1" />
+            <TextField fx:id="goalXField" layoutX="928.0" layoutY="39.0" prefWidth="42.0" text="12" />
+            <TextField fx:id="goalYField" layoutX="928.0" layoutY="61.0" prefWidth="42.0" text="13" />
             <Button fx:id="startButton" layoutX="899.0" layoutY="89.0" mnemonicParsing="false" onAction="#startPressed" prefHeight="41.9609375" prefWidth="76.0" text="Start" />
             <Label font="$x2" layoutX="915.0" layoutY="42.0" text="X" />
             <Label font="$x2" layoutX="915.0" layoutY="64.0" text="Y" />
@@ -114,6 +124,9 @@
                 <Font name="Arial Bold" size="14.0" />
               </font>
             </Label>
+            <Label layoutX="110.0" layoutY="19.0" text="Initial Seed  Value Range" />
+            <Label layoutX="267.0" layoutY="6.0" text="MIN" />
+            <Label layoutX="326.0" layoutY="6.0" text="MAX" />
           </children>
         </Pane>
       </top>
