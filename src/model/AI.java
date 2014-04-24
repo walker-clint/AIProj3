@@ -1,6 +1,8 @@
 package model;
 
+import java.awt.Checkbox;
 import java.util.Random;
+
 import application.Main;
 
 /*
@@ -10,8 +12,10 @@ import application.Main;
 public class AI {
 	//variables
 	public 			Square[][] 		qtable;				// container for learning table
-	private			int				goalX,				// X position of current goal
-									goalY;				// Y position of current goal
+	private			int				goalR,				// X position of current goal
+									goalC,				// Y position of current goal
+									nextR,
+									nextC;
 	private   		double			alpha,				// value to effect speed of learning in the system
 									gamma,				// value to emphasize / deemphasize the next moves value
 									lambda,  			// random move chance
@@ -21,6 +25,12 @@ public class AI {
 									seedMin,			// initial seed for the Min value of the qtable weight
 									seedMax,			// initial seed for the Max value of the qtable weight
 									rewardDecay;
+	private   		boolean			moveLeft,
+									moveRight,
+									moveUp,
+									moveDown,
+									foundGoal,
+									random;
 
 	
 	//==============================================================================
@@ -29,10 +39,10 @@ public class AI {
 		qtable = new Square[Main.ROWS][Main.COLUMNS];
 	}
 	
-	public AI(int _goalX, int _goalY, double _seedMin, double _seedMax, double _alpha,
+	public AI(int _goalR, int _goalC, int _startR, int _startC, double _seedMin, double _seedMax, double _alpha,
 			double _gamma, double _lambda, double _lambdaDecay, double _seedReward, double _goalReward, double _rewardDecay) {
-		goalX = _goalX;
-		goalY = _goalY;
+		goalR = _goalR;
+		goalC = _goalC;
 		seedMin = _seedMin;
 		seedMax = _seedMax;
 		alpha = _alpha;
@@ -43,6 +53,15 @@ public class AI {
 		goalReward = _goalReward;
 		rewardDecay = _rewardDecay;
 		qtable = new Square[Main.ROWS][Main.COLUMNS];
+		moveLeft = false;
+		moveRight = false;
+		moveUp = false;
+		moveDown = false;
+		foundGoal = false;
+		random = false;
+		nextR = _startR;
+		nextC = _startC;
+		
 	}
 	
 	//==============================================================================
@@ -52,11 +71,11 @@ public class AI {
 	public void seedQTable() {
 		for (int c = 0; c < Main.COLUMNS; c++){
 			for (int r = 0; r < Main.ROWS; r++){
-				double random = new Random().nextDouble();
-				double result = seedMin + (random * (seedMax - seedMin));
+				double rand = new Random().nextDouble();
+				double result = seedMin + (rand * (seedMax - seedMin));
 				qtable[r][c] = new Square();
 				qtable[r][c].setWeight(result); 
-				System.out.println("double random value: " + random + "  random: " + result + " seeded value = " + qtable[r][c].getWeight());
+				System.out.println("double random value: " + rand + "  random number: " + result + " seeded value = " + qtable[r][c].getWeight());
 				qtable[r][c].setReward(seedReward);
 				System.out.println("QTable[" + r + "][" + c + "] toString: " + qtable[r][c].toString());
 			}
@@ -89,8 +108,53 @@ public class AI {
 		}
 	}
 	
-	public void makeMove(int r, int c){
+	private void checkRandom(){
+		double r = new Random().nextDouble();
+		double result = lambda + (r * (100 - lambda));
+		if(result > lambda){
+			random = false;
+		}
+		random = true;
+		System.out.println("Check random move in model.AI: " + result + " Lambda= " + lambda + "Random? " + random);
 		
+	}
+	
+	public void makeMove(int r, int c){
+		System.out.println("RC [" + r + "][" + c + "]");
+		//checkRandom();
+		
+		setDirection(r, c, random);
+		if (moveLeft){
+			nextR -= 1;
+			if (nextR < 0){
+				//error
+				System.out.println("nextR " + nextR + " in AI is less than: 0 ");
+				Main.GBC.errorStop();
+			}
+		}
+		if (moveRight){
+			nextR += 1;
+			if(nextR >= Main.ROWS){
+				//error
+				System.out.println("nextR " + nextR + " in AI is greater than: Main.Rows " + Main.ROWS);
+				Main.GBC.errorStop();
+			}
+		}
+		if(moveUp){
+			nextC -= 1;
+			if(nextC < 0){
+				System.out.println("nextC " + nextC + " in AI is less than: 0 ");
+				Main.GBC.errorStop();
+			}
+		}
+		if(moveDown){
+			nextC += 1;
+			if(nextC >= Main.COLUMNS){
+				//error
+				System.out.println("nextC " + nextC + " in AI is greater than: Main.Rows " + Main.COLUMNS);
+				Main.GBC.errorStop();
+			}
+		}
 	}
 	
 
@@ -100,8 +164,7 @@ public class AI {
 	
 	private double updateQTable(int r, int c, double nextWeight) {
 		// Q(s,a) = Q(s,a) + alpha(reward + (gamma * Q(s',a')) - Q(s,a)))
-		double result =
-				qtable[r][c].getWeight() + (alpha * (qtable[r][c].getReward() + ((gamma * nextWeight) - qtable[r][c].getWeight())));
+		double result = qtable[r][c].getWeight() + (alpha * (qtable[r][c].getReward() + ((gamma * nextWeight) - qtable[r][c].getWeight())));
 		
 		return result;
 	}
@@ -110,14 +173,70 @@ public class AI {
 		lambda -= lambdaDecay;
 	}
 	
-	public void decay() {
-		
+	public double decayReward(double value) {
+		return value *= rewardDecay;
 	}
 	
 	private void setDirection(int r, int c, boolean random){
 		double left, right, up, down, leftX = 0, rightX, upY, downY, rayX, rayY, magnitude;
 		if (random){
-			
+			Random rNum = new Random();
+			boolean selectingRandomMove = true, validMove = false;
+			while (selectingRandomMove){
+				int move = rNum.nextInt(4);
+				System.out.println("Random move is true: move is: " + move + " 0 = left: 1 = right: 2 = up: 3 = down");
+				if(r-1 < 0){
+					validMove = false;
+					System.out.println("r = " + r + " r-1 = " + (r-1) + "Validmove = " + validMove);
+				} else if((r+1) >= Main.ROWS){
+					System.out.println("r = " + r + " r+1 = " + (r+1) + "Validmove = " + validMove);
+					validMove = false;
+				} else if((c-1) < 0){
+					System.out.println("c = " + c + " c-1 = " + (c-1) + "Validmove = " + validMove);
+					validMove = false;
+				} else if((c+1) >= Main.COLUMNS){
+					System.out.println("c = " + c + " c+1 = " + (r+1) + "Validmove = " + validMove);
+					validMove = false;
+				} else {
+					System.out.println("Validmove = " + validMove);
+					validMove = true;
+				}
+				if (validMove){
+					moveLeft = false;
+					moveRight = false;
+					moveUp = false;
+					moveDown = false;
+					switch (move) {
+					case 0:
+						selectingRandomMove = false;
+						moveLeft = true;
+						nextR = (r-1);
+						nextC = c;
+						break;
+					case 1:
+						selectingRandomMove = false;
+						moveRight = true;
+						nextR = (r+1);
+						nextC = c;
+						break;
+					case 2:
+						selectingRandomMove = false;
+						moveUp = true;
+						nextR = r;
+						nextC = (c-1);
+						break;
+					case 3:
+						selectingRandomMove = false;
+						moveDown = true;
+						nextR = r;
+						nextC = (c+1);
+						break;
+					default:
+						System.out.println("Error random move switch entering default case :: move: " + move);
+						break;
+					}
+				}
+			}
 		} else {
 			double dir = 270;
 			double qVal;
@@ -125,6 +244,7 @@ public class AI {
 			left = updateQTable(r, c, left);
 			System.out.println("qtable[" + r + "][" + c + "] left weight = " + qtable[r][c].getWeight());
 			qVal = left;
+			moveLeft = true;
 			right = getRight(r, c);
 			right = updateQTable(r, c, right);
 			System.out.println("qtable[" + r + "][" + c + "] right weight = " + qtable[r][c].getWeight());
@@ -136,16 +256,40 @@ public class AI {
 			System.out.println("qtable[" + r + "][" + c + "] down weight = " + qtable[r][c].getWeight());
 			if (right > qVal){
 				dir = 90;
+				moveRight = true;
+				moveLeft = false;
 				qVal = right;
 			} 
 			if (up > qVal){
 				dir = 0;
+				moveUp = true;
+				moveRight = false;
+				moveLeft = false;
 				qVal = up;
 			}
 			if (down > qVal){
 				dir = 180;
 				qVal = down;
+				moveDown = true;
+				moveUp = false;
+				moveLeft = false;
+				moveRight = false;
 			}
+			
+			if(moveLeft){
+				
+			}
+			if(moveRight){
+				
+			}
+			if(moveUp){
+				
+			}
+			if(moveDown){
+				
+			}
+			
+			
 			qtable[r][c].setDirection(dir);
 			qtable[r][c].setWeight(qVal);
 			
@@ -162,7 +306,7 @@ public class AI {
 			qtable[r][c].setScaleFactorY(magnitude);
 			
 			qtable[r][c].setRotation(Math.atan2(rayY, rayX));
-	
+			
 		}
 	}
 	
@@ -199,20 +343,20 @@ public class AI {
 	//==============================================================================
 	// getters and setters
 	
-	public int getGoalX() {
-		return goalX;
+	public int getGoalR() {
+		return goalR;
 	}
 
-	public void setGoalX(int goalX) {
-		this.goalX = goalX;
+	public void setGoalR(int goalR) {
+		this.goalR = goalR;
 	}
 
-	public int getGoalY() {
-		return goalY;
+	public int getGoalC() {
+		return goalC;
 	}
 
-	public void setGoalY(int goalY) {
-		this.goalY = goalY;
+	public void setGoalC(int goalC) {
+		this.goalC = goalC;
 	}
 
 	public double getAlpha() {
@@ -229,6 +373,30 @@ public class AI {
 
 	public void setGamma(double gamma) {
 		this.gamma = gamma;
+	}
+
+	public int getNextR() {
+		return nextR;
+	}
+
+	public void setNextR(int nextR) {
+		this.nextR = nextR;
+	}
+
+	public int getNextC() {
+		return nextC;
+	}
+
+	public void setNextC(int nextC) {
+		this.nextC = nextC;
+	}
+
+	public boolean isFoundGoal() {
+		return foundGoal;
+	}
+
+	public void setFoundGoal(boolean foundGoal) {
+		this.foundGoal = foundGoal;
 	}
 
 	public double getLambda() {

@@ -12,8 +12,12 @@
   <children>
     <Pane id="rootScreen" layoutX="0.0" layoutY="0.0" prefHeight="400.0" prefWidth="800.0">
       <children>
-        <Button fx:id="startGame" layoutX="675.0" layoutY="299.0" mnemonicParsing="false" onAction="#startGameButtonPressed" prefHeight="31.9609375" prefWidth="64.0" text="Start" />
-        <Button fx:id="exit" layoutX="700.0" layoutY="343.0" mnemonicParsing="false" onAction="#exit" text="Exit" />
+        <Button fx:id="startGame" layoutX="649.0" layoutY="276.0" mnemonicParsing="false" onAction="#startGameButtonPressed" prefHeight="35.33203125" prefWidth="90.0" text="Start">
+          <font>
+            <Font name="Arial Bold" size="13.0" fx:id="x1" />
+          </font>
+        </Button>
+        <Button fx:id="exit" font="$x1" layoutX="660.0" layoutY="328.0" mnemonicParsing="false" onAction="#exit" prefHeight="28.310546875" prefWidth="77.0" text="Exit" />
         <Label layoutX="83.0" layoutY="54.0" text="AI Project 3 -- Treasure Hunter AI">
           <font>
             <Font name="System Bold" size="30.0" />

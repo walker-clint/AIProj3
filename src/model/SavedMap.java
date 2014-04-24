@@ -84,7 +84,7 @@ public class SavedMap implements Serializable {
 	public boolean saveMap(SavedMap map, String fileName)
 	{
 		System.out.println("Write message tostring: " + map.toString());
-		String path = Main.FILE_PATH + "\\bin\\Maps\\" + fileName + ".map";
+		String path = Main.FILE_PATH + "/bin/Maps/" + fileName + ".map";
 		System.out.println("Save File as: " + path);
 		try {
 			FileOutputStream outputStream =
@@ -123,8 +123,7 @@ public class SavedMap implements Serializable {
 		catch(Exception ex) {
 			System.out.print(ex.toString());
 			return null;				
-		}
-		
+		}	
 	}
 
 	public double getLambda() {
