@@ -364,85 +364,7 @@ public class GameBoardController implements Initializable, ControlledScreen {
 	//==============================================================================
 	// NON-FXML Methods
 	
-	void startLoop(){
-		timer = new Timer();
-		counter = 0;
-		
-		timer.schedule(new TimerTask() {
-			public void run() {
-				Platform.runLater(new Runnable() {
-					public void run() {
-						counter++;
-						speedCounter++;
-						if (counter == 1000){
-							counter = 0;
-							clock++;
-							runTimerLabel.setText("" + clock);
-						}
-						if ((speedCounter == speed && !paused) || stepping){ // one second clock
-							System.out.println("pre-move location: [" + R + "][" + C + "]");
-							Main.MACHINE.qtable[R][C].setColor("DARKSLATEBLUE");
-							rectangles[R][C].setFill(Color.DARKSLATEBLUE);
-							Main.MACHINE.makeMove(R, C);
-							System.out.println("Goal is found= " + Main.MACHINE.isFoundGoal());
-							if(!currentLambdaLabel.isVisible())	{
-								currentLambdaLabel.setVisible(true);
-							}
-							lambdaField.setText(Main.MACHINE.getLambda() + "");
-							
-							R = Main.MACHINE.getNextR();
-							C = Main.MACHINE.getNextC();
-							System.out.println("move location: [" + R + "][" + C + "]");
-							if (!Main.MACHINE.qtable[R][C].isGoal()){
-								Main.MACHINE.qtable[R][C].setColor("BLUEVIOLET");
-								rectangles[R][C].setFill(Color.BLUEVIOLET);
-							}
-							moves.add(new Move(R,C));
-							numberOfMoves++;
-							movesLabel.setText(numberOfMoves + "");
 
-							
-							if(Main.MACHINE.isFoundGoal() || (R == goalR && C == goalC)){
-								runs++;
-								numberOfMoves = 0;
-								numberOfRunsLabel.setText("" + runs);
-								//unwind the reward back through the linked list or queue
-								for (int i = moves.size() - 2; i >= 0; i--){
-									System.out.print("Unwind i= " + i + " :: " + moves.get(i).toString() + "  start reward: " + Main.MACHINE.qtable[moves.get(i).getR()][moves.get(i).getC()].getReward() + "\n\t Start Weight= " + Main.MACHINE.qtable[moves.get(i).getR()][moves.get(i).getC()].getWeight());
-									;
-									Main.MACHINE.qtable[moves.get(i).getR()][moves.get(i).getC()].setReward(Main.MACHINE.updateRewardTable(moves.get(i).getR(), moves.get(i).getC(), moves.get(i+1).getR(), moves.get(i+1).getC()));
-									//Main.MACHINE.qtable[moves.get(i).getR()][moves.get(i).getC()].setWeight(Main.MACHINE.updateQTable(moves.get(i).getR(), moves.get(i).getC(), moves.get(i+1).getR(), moves.get(i+1).getC()));
-									System.out.print("  rewardvalue: " + Main.MACHINE.qtable[moves.get(i).getR()][moves.get(i).getC()].getReward() + "  startReward after decay " + Main.MACHINE.qtable[moves.get(i).getR()][moves.get(i).getC()].getReward() + "\n\t end Weight= " + Main.MACHINE.qtable[moves.get(i).getR()][moves.get(i).getC()].getWeight()+ "\n");
-									
-								}
-								resetMapColors();
-								//choose new starting point
-								setStartPos();
-								System.out.println("New Start Pos= [" + startR + "][" + startC + "]" );
-								
-								rectangles[startR][startC].setFill(Color.BLUEVIOLET);
-								//erase linked list of moves
-								moves.clear();
-								//decay lambda
-								Main.MACHINE.decayLambda();
-								
-								Main.MACHINE.setFoundGoal(false);
-								updateBoard();
-								if(runs > numRuns){
-									errorStop();
-								}
-							}
-							if (stepping){
-								stepping = false;
-							}
-							speedCounter = 0;
-						}
-					}
-				});
-			}
-		}, 0, 1);
-	}
-	
 	void resetMapColors(){
 		System.out.println("START RESET BOARD COLORS");
 		for (int c = 0; c < Main.COLUMNS; c++){
@@ -940,6 +862,22 @@ public class GameBoardController implements Initializable, ControlledScreen {
 		this.rewardDecay = rewardDecay;
 	}
 
+	public double getAlpha() {
+		return alpha;
+	}
+
+	public void setAlpha(double alpha) {
+		this.alpha = alpha;
+	}
+
+	public double getGamma() {
+		return gamma;
+	}
+
+	public void setGamma(double gamma) {
+		this.gamma = gamma;
+	}
+
 	//==============================================================================
 	@Override
 	public void setScreenParent(ScreensController screenPage) {
@@ -956,5 +894,101 @@ public class GameBoardController implements Initializable, ControlledScreen {
 		seedMinField.requestFocus();
 		Main.PRIMARY_STAGE.setY(10);
 	}
+	
+	
+	void startLoop(){
+		timer = new Timer();
+		counter = 0;
+		
+		timer.schedule(new TimerTask() {
+			public void run() {
+				Platform.runLater(new Runnable() {
+					public void run() {
+						counter++;
+						speedCounter++;
+						if (counter == 1000){
+							counter = 0;
+							clock++;
+							runTimerLabel.setText("" + clock);
+						}
+						if ((speedCounter == speed && !paused) || stepping){ // one second clock
+							System.out.println("pre-move location: [" + R + "][" + C + "]");
+							
+							Main.MACHINE.qtable[R][C].setColor("DARKSLATEBLUE");
+							rectangles[R][C].setFill(Color.DARKSLATEBLUE);
+							Main.MACHINE.makeMove(R, C);
+							int 	nextR = Main.MACHINE.getNextR(),
+									nextC = Main.MACHINE.getNextC();
+							System.out.println("Goal is found= " + Main.MACHINE.isFoundGoal());
+							if(!currentLambdaLabel.isVisible())	{
+								currentLambdaLabel.setVisible(true);
+							}
+							lambdaField.setText(Main.MACHINE.getLambda() + "");
+							Main.MACHINE.qtable[R][C].updateWeight(nextR, nextC);
+							Main.MACHINE.qtable[R][C].updateSquareDisplay();
+							R = nextR;
+							C = nextC;
+							System.out.println("move location: [" + R + "][" + C + "]");
+							if (!Main.MACHINE.qtable[R][C].isGoal()){
+								Main.MACHINE.qtable[R][C].setColor("BLUEVIOLET");
+								rectangles[R][C].setFill(Color.BLUEVIOLET);
+							}
+							moves.add(new Move(R,C));
+							numberOfMoves++;
+							movesLabel.setText(numberOfMoves + "");
+
+							
+							if(Main.MACHINE.isFoundGoal() || (R == goalR && C == goalC)){
+								runs++;
+								numberOfMoves = 0;
+								numberOfRunsLabel.setText("" + runs);
+								//unwind the reward back through the linked list or queue
+								if (moves.size() > 1){
+									for (int i = moves.size() - 2; i >= 0; i--){
+										System.out.print("Unwind i= " + i + " :: " + moves.get(i).toString() + "  start reward: " + Main.MACHINE.qtable[moves.get(i).getR()][moves.get(i).getC()].getReward() + "\n\t Start Weight= " + Main.MACHINE.qtable[moves.get(i).getR()][moves.get(i).getC()].getWeight());
+										;
+										int locR = moves.get(i).getR();
+										int lastR = moves.get(i+1).getR();
+										int locC = moves.get(i).getC();
+										int lastC = moves.get(i+1).getC();
+										System.out.print("Unwind i= " + i + " :: " + moves.get(i).toString() + "  start reward: " + Main.MACHINE.qtable[locR][locC].getReward() 
+												+ "\n\t Start Weight= " + Main.MACHINE.qtable[locR][locC].getWeight());
+										;
+										Main.MACHINE.qtable[locR][locC].updateReward(lastR, lastC);
+				
+										System.out.print("  rewardvalue: " + Main.MACHINE.qtable[locR][locC].getReward() 
+												+ "  startReward after decay " + Main.MACHINE.qtable[locR][locC].getReward() 
+												+ "\n\t end Weight= " + Main.MACHINE.qtable[locR][locC].getWeight()+ "\n");
+										
+									}
+								}
+								resetMapColors();
+								//choose new starting point
+								setStartPos();
+								System.out.println("New Start Pos= [" + startR + "][" + startC + "]" );
+								
+								rectangles[startR][startC].setFill(Color.BLUEVIOLET);
+								//erase linked list of moves
+								moves.clear();
+								//decay lambda
+								Main.MACHINE.decayLambda();
+								
+								Main.MACHINE.setFoundGoal(false);
+								updateBoard();
+								if(runs > numRuns){
+									errorStop();
+								}
+							}
+							if (stepping){
+								stepping = false;
+							}
+							speedCounter = 0;
+						}
+					}
+				});
+			}
+		}, 0, 1);
+	}
+	
 
 }

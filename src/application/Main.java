@@ -34,7 +34,7 @@ public class Main extends Application {
 			static	Stage						PRIMARY_STAGE;
 			static  Scene						MAIN_SCENE;
 			static	Group						ROOT;
-			static  AI 							MACHINE;
+	public	static  AI 							MACHINE;
 	
 	//==============================================================================
 			
