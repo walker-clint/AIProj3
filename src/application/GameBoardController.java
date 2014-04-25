@@ -19,6 +19,8 @@ import java.util.ResourceBundle;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import com.sun.xml.internal.ws.wsdl.writer.document.StartWithExtensionsType;
+
 import model.AI;
 import model.SavedMap;
 import model.Move;
@@ -59,6 +61,8 @@ public class GameBoardController implements Initializable, ControlledScreen {
 	@FXML	Label				startCLabel;
 	@FXML	Label				runTimerLabel;
 	@FXML	Label				numberOfRunsLabel;
+	@FXML	Label				currentLambdaLabel;
+	@FXML	Label				movesLabel;
 	
 	@FXML	TextField			lambdaField;
 	@FXML	TextField			lambdaDecayField;
@@ -77,6 +81,7 @@ public class GameBoardController implements Initializable, ControlledScreen {
 	@FXML	TextField			fileNameField;
 	@FXML	TextField			seedMaxField;
 	@FXML	TextField			seedMinField;
+	@FXML	TextField			numRunsField;
 	
 		
 	@FXML	Button				pauseButton;
@@ -116,7 +121,9 @@ public class GameBoardController implements Initializable, ControlledScreen {
 								clock				= 0,
 								speed				= 500,
 								speedCounter 		= 0,
-								runs				= 0;
+								numberOfMoves		= 0,
+								runs				= 0,
+								numRuns;
 	private String				input;
 	private boolean				random 				= true,
 								started				= false,
@@ -188,6 +195,7 @@ public class GameBoardController implements Initializable, ControlledScreen {
 				runs = 0;
 				counter = 0;
 				clock = 0;
+				pausePressed(event);
 				startLoop();
 			} 
 		}
@@ -195,11 +203,12 @@ public class GameBoardController implements Initializable, ControlledScreen {
 	
 	@FXML
 	void saveMapPressed(ActionEvent event){
-		if (fileNameField.getText().equals("") || fileNameField.getText().equals("Enter File Name")){
+		if (fileNameField.getText().equals("") || fileNameField.getText().equals("Enter File Name") || fileNameField.getText().equals("File Saved")){
 			fileNameField.requestFocus();
 			fileNameField.setText("Enter File Name");
 		} else {
 			saveMap(fileNameField.getText());
+			fileNameField.setText("File Saved");
 		}
 	}
 	
@@ -252,6 +261,10 @@ public class GameBoardController implements Initializable, ControlledScreen {
 			speedCounter = 0;
 			speed = 10;
 			speedButton.setText("Very Fast");
+		} else if (speed == 10){ 
+			speedCounter = 0;
+			speed = 1;
+			speedButton.setText("Running");
 		} else {
 			speedCounter = 0;
 			speed = 1000;
@@ -270,22 +283,28 @@ public class GameBoardController implements Initializable, ControlledScreen {
 	
 	@FXML
 	void pausePressed(ActionEvent event){
+		System.out.println("Paused Pressed pause = " + paused + " before button press. Stepping = " + stepping);
 		if (paused){
 			paused = false;
 			stepping = false;
 			stepButton.setVisible(false);
 			speedCounter = 0;
+			currentLambdaLabel.setVisible(false);
+			lambdaField.setText(lambda + "");
 		} else {
 			paused = true;
 			stepping = false;
 			stepButton.setVisible(true);
 		}
+		System.out.println("Paused Pressed pause = " + paused + " after button press. Stepping = " + stepping);
 	}
 	
 	@FXML 
 	public void stopPressed(ActionEvent event){
 		if (started){
-			pausePressed(event);
+			if(!paused){
+				pausePressed(event);
+			}
 			startButton.setVisible(true);
 			stopButton.setVisible(false);
 			pauseButton.setVisible(false);
@@ -362,27 +381,61 @@ public class GameBoardController implements Initializable, ControlledScreen {
 						}
 						if ((speedCounter == speed && !paused) || stepping){ // one second clock
 							System.out.println("pre-move location: [" + R + "][" + C + "]");
+							Main.MACHINE.qtable[R][C].setColor("DARKSLATEBLUE");
+							rectangles[R][C].setFill(Color.DARKSLATEBLUE);
 							Main.MACHINE.makeMove(R, C);
-							if(Main.MACHINE.isFoundGoal()){
-								runs++;
-								//unwind the reward back through the linked list or queue
-								//choose new starting point 
-								//erase linked list of moves
-								//decay lambda
-								Main.MACHINE.decayLambda();
+							System.out.println("Goal is found= " + Main.MACHINE.isFoundGoal());
+							if(!currentLambdaLabel.isVisible())	{
+								currentLambdaLabel.setVisible(true);
 							}
+							lambdaField.setText(Main.MACHINE.getLambda() + "");
+							
 							R = Main.MACHINE.getNextR();
 							C = Main.MACHINE.getNextC();
 							System.out.println("move location: [" + R + "][" + C + "]");
-							Main.MACHINE.qtable[R][C].setColor("DARKSLATEBLUE");
-							rectangles[R][C].setFill(Color.DARKSLATEBLUE);
+							if (!Main.MACHINE.qtable[R][C].isGoal()){
+								Main.MACHINE.qtable[R][C].setColor("BLUEVIOLET");
+								rectangles[R][C].setFill(Color.BLUEVIOLET);
+							}
 							moves.add(new Move(R,C));
-							numberOfRunsLabel.setText("" + runs);
-							Move nextMove = new Move(R, C);
-							moves.add(nextMove);
+							numberOfMoves++;
+							movesLabel.setText(numberOfMoves + "");
+
+							
+							if(Main.MACHINE.isFoundGoal() || (R == goalR && C == goalC)){
+								runs++;
+								numberOfMoves = 0;
+								numberOfRunsLabel.setText("" + runs);
+								//unwind the reward back through the linked list or queue
+								for (int i = moves.size() - 2; i >= 0; i--){
+									System.out.print("Unwind i= " + i + " :: " + moves.get(i).toString() + "  start reward: " + Main.MACHINE.qtable[moves.get(i).getR()][moves.get(i).getC()].getReward() + "\n\t Start Weight= " + Main.MACHINE.qtable[moves.get(i).getR()][moves.get(i).getC()].getWeight());
+									;
+									Main.MACHINE.qtable[moves.get(i).getR()][moves.get(i).getC()].setReward(Main.MACHINE.updateRewardTable(moves.get(i).getR(), moves.get(i).getC(), moves.get(i+1).getR(), moves.get(i+1).getC()));
+									//Main.MACHINE.qtable[moves.get(i).getR()][moves.get(i).getC()].setWeight(Main.MACHINE.updateQTable(moves.get(i).getR(), moves.get(i).getC(), moves.get(i+1).getR(), moves.get(i+1).getC()));
+									System.out.print("  rewardvalue: " + Main.MACHINE.qtable[moves.get(i).getR()][moves.get(i).getC()].getReward() + "  startReward after decay " + Main.MACHINE.qtable[moves.get(i).getR()][moves.get(i).getC()].getReward() + "\n\t end Weight= " + Main.MACHINE.qtable[moves.get(i).getR()][moves.get(i).getC()].getWeight()+ "\n");
+									
+								}
+								resetMapColors();
+								//choose new starting point
+								setStartPos();
+								System.out.println("New Start Pos= [" + startR + "][" + startC + "]" );
+								
+								rectangles[startR][startC].setFill(Color.BLUEVIOLET);
+								//erase linked list of moves
+								moves.clear();
+								//decay lambda
+								Main.MACHINE.decayLambda();
+								
+								Main.MACHINE.setFoundGoal(false);
+								updateBoard();
+								if(runs > numRuns){
+									errorStop();
+								}
+							}
 							if (stepping){
 								stepping = false;
 							}
+							speedCounter = 0;
 						}
 					}
 				});
@@ -390,11 +443,36 @@ public class GameBoardController implements Initializable, ControlledScreen {
 		}, 0, 1);
 	}
 	
-	
+	void resetMapColors(){
+		System.out.println("START RESET BOARD COLORS");
+		for (int c = 0; c < Main.COLUMNS; c++){
+			for (int r = 0; r < Main.ROWS; r++){
+				if (goalR == r && goalC == c){
+					 Main.MACHINE.qtable[r][c].setColor("CORNFLOWERBLUE");
+					 rectangles[r][c].setFill(Color.CORNFLOWERBLUE);
+					 System.out.println("QTable[" + r + "][" + c + "] " + Main.MACHINE.qtable[r][c].toString());
+				} else if ( Main.MACHINE.qtable[r][c].isWall()){
+					System.out.println("QTable[" + r + "][" + c + "] " + Main.MACHINE.qtable[r][c].toString());
+					Main.MACHINE.qtable[r][c].setColor("DARKGREY");
+					 rectangles[r][c].setFill(Color.DARKGREY);
+				} else {
+					System.out.println("QTable[" + r + "][" + c + "] " + Main.MACHINE.qtable[r][c].toString());
+					Main.MACHINE.qtable[r][c].setColor("LIGHTGRAY");
+					rectangles[r][c].setFill(Color.LIGHTGRAY);
+					arrows[r][c].setRotate(Main.MACHINE.qtable[r][c].getDirection());
+					arrows[r][c].setScaleX(Main.SCALE_ADJUSTMENT_FACTOR * Main.MACHINE.qtable[r][c].getScaleFactorX());
+					arrows[r][c].setScaleY(Main.SCALE_ADJUSTMENT_FACTOR * Main.MACHINE.qtable[r][c].getScaleFactorY());
+					arrows[r][c].setLayoutX((35 * r) + offsetX); //remove after testing
+					arrows[r][c].setLayoutY((35 * c) + offsetY); //remove after testing
+					
+				}
+			}
+		}
+		System.out.println("STOP RESET BOARD COLORS");
+	}
 	
 	void saveMap(String fileName){
-		SavedMap map = new SavedMap(lambda, lambdaDecay, reward, rewardDecay, alpha, gamma, seedMin, seedMax, seedReward,
-					startR, startC, goalR, goalC, counter, clock, runs, Main.MACHINE.qtable);
+		SavedMap map = new SavedMap(lambda, lambdaDecay, reward, rewardDecay, alpha, gamma, seedMin, seedMax, seedReward, startR, startC, R, C, numRuns, numberOfMoves, goalR, goalC, counter, clock, runs, Main.MACHINE.qtable);
 		map.saveMap(map, fileName);
 	}
 	
@@ -552,6 +630,10 @@ public class GameBoardController implements Initializable, ControlledScreen {
 		stepButton.setVisible(false);
 		stopButton.setVisible(false);
 		resetButton.setVisible(false);
+		numberOfMoves = 0;
+		numRuns = 0;
+		numberOfRunsLabel.setText(numRuns + "");
+		movesLabel.setText(numberOfMoves + "");
 	}
 	
 	
@@ -602,6 +684,10 @@ public class GameBoardController implements Initializable, ControlledScreen {
 		startR = map.getStartX();
 		startC = map.getStartY();
 		runs = map.getRuns();
+		numRuns = map.getNumRuns();
+		R = map.getR();
+		C = map.getC();
+		numberOfMoves = map.getNumMoves();
 		goalRField.setText(goalR + "");
 		goalCField.setText(goalC + "");
 		alphaField.setText(alpha + "");
@@ -612,7 +698,8 @@ public class GameBoardController implements Initializable, ControlledScreen {
 		rewardDecayField.setText(rewardDecay +"");
 		runTimerLabel.setText(clock + "");
 		numberOfRunsLabel.setText(runs + "");
-		
+		movesLabel.setText(numberOfMoves + "");
+		numRunsField.setText(numRuns + "");
 		Main.MACHINE = new AI(goalR, goalC, startR, startC, seedMin, seedMax, alpha, gamma, lambda, lambdaDecay, seedReward, reward, rewardDecay);
 		for (int r = 0; r < Main.ROWS; r++){
 			for (int c = 0; c < Main.COLUMNS; c++){
@@ -738,6 +825,17 @@ public class GameBoardController implements Initializable, ControlledScreen {
 			goalCField.requestFocus();
 			return false;
 		}
+		input = numRunsField.getText();
+		try {
+			numRuns = Integer.parseInt(input);
+			if (numRuns < 0){
+				numRunsField.requestFocus();
+				return false;
+			}
+		} catch (Exception e) {
+			numRunsField.requestFocus();
+			return false;
+		}
 		return true;
 	}
 	
@@ -772,9 +870,13 @@ public class GameBoardController implements Initializable, ControlledScreen {
 			System.out.println("startR: " + startR + "  startC: " + startC);
 			if(!Main.MACHINE.qtable[startR][startC].isGoal() || !Main.MACHINE.qtable[startR][startC].isWall()){
 				Main.MACHINE.qtable[startR][startC].setColor("CORNFLOWERBLUE");
+				rectangles[startR][startC].setFill(colorTable.get(Color.CORNFLOWERBLUE));
+				R = startR;
+				C = startC;
 				settingStartPos = false;
 			}
 		}
+		
 	}
 	
 	private void buildColorTable(){
@@ -785,7 +887,8 @@ public class GameBoardController implements Initializable, ControlledScreen {
 		colorTable.put("RED", Color.RED);
 		colorTable.put("CORNFLOWERBLUE", Color.CORNFLOWERBLUE);
 		colorTable.put("BLUEVIOLET", Color.BLUEVIOLET);
-		colorTable.put("ALICEBLUE", Color.ALICEBLUE);
+		colorTable.put("DARKSLATEBLUE", Color.DARKSLATEBLUE);
+		colorTable.put("DARKCYAN", Color.DARKCYAN);
 		System.out.println("DARKGREY= " + "DARKGREY" + " from dictionary: " + colorTable.get("DARKGREY"));
 		System.out.println("BLACK= " + "BLACK" + " from dictionary: " + colorTable.get("BLACK"));
 		System.out.println("LIGHTGRAY= " + "LIGHTGRAY" + " from dictionary: " + colorTable.get("LIGHTGRAY"));
@@ -794,6 +897,8 @@ public class GameBoardController implements Initializable, ControlledScreen {
 		System.out.println("CORNFLOWERBLUE= " + "CORNFLOWERBLUE" + " from dictionary: " + colorTable.get("CORNFLOWERBLUE"));
 		System.out.println("BLUEVIOLET= " + "BLUEVIOLET" + " from dictionary: " + colorTable.get("BLUEVIOLET"));
 		System.out.println("DARKSLATEBLUE= " + "DARKSLATEBLUE" + " from dictionary: " + colorTable.get("DARKSLATEBLUE"));
+		System.out.println("DARKCYAN= " + "DARKCYAN" + " from dictionary: " + colorTable.get("DARKCYAN"));
+		
 	}
 	
 	public void errorStop(){
@@ -825,6 +930,14 @@ public class GameBoardController implements Initializable, ControlledScreen {
 
 	public void setReward(double reward) {
 		this.reward = reward;
+	}
+
+	public double getRewardDecay() {
+		return rewardDecay;
+	}
+
+	public void setRewardDecay(double rewardDecay) {
+		this.rewardDecay = rewardDecay;
 	}
 
 	//==============================================================================

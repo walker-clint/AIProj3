@@ -8,27 +8,33 @@ public class Move implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	int x;
-	int y;
+	int r;
+	int c;
+	
 	
 	public Move() {
-		x = 0;
-		y = 0;
+		r = 0;
+		c= 0;
 	}
-	public Move(int _x, int _y) {
-		x = _x;
-		y = _y;
+	public Move(int _r, int _c) {
+		r = _r;
+		c = _c;
 	}
-	public int getX() {
-		return x;
+	public int getR() {
+		return r;
 	}
-	public void setX(int x) {
-		this.x = x;
+	public void setX(int r) {
+		this.r = r;
 	}
-	public int getY() {
-		return y;
+	public int getC() {
+		return c;
 	}
-	public void setY(int y) {
-		this.y = y;
+	public void setC(int c) {
+		this.c = c;
+	}
+	
+	@Override
+	public String toString() {
+		return "Move [row=" + r + ", column=" + c + "]";
 	}
 }

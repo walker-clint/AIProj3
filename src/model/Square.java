@@ -60,13 +60,21 @@ public class Square implements Serializable {
 		return scaleFactorX;
 	}
 	public void setScaleFactorX(double scaleFactorX) {
-		this.scaleFactorX = scaleFactorX;
+		if(scaleFactorX > .1){
+			this.scaleFactorX = .1;
+		} else {
+			this.scaleFactorX = scaleFactorX;
+		}
 	}
 	public double getScaleFactorY() {
 		return scaleFactorY;
 	}
 	public void setScaleFactorY(double scaleFactorY) {
-		this.scaleFactorY = scaleFactorY;
+		if(scaleFactorY > .1){
+			this.scaleFactorY = .1;
+		} else {
+			this.scaleFactorY = scaleFactorY;
+		}
 	}
 	public double getDirection() {
 		return direction;

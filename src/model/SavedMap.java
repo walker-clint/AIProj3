@@ -47,7 +47,9 @@ public class SavedMap implements Serializable {
 							speedCounter 		= 0,
 							runs				= 0,
 							r					= 0,
-							c					= 0;
+							c					= 0,
+							numRuns,
+							numMoves;
 	private String			input;
 	private boolean			random 				= true,
 							started				= false,
@@ -59,7 +61,7 @@ public class SavedMap implements Serializable {
 	
 	public SavedMap(double _lambda, double _lambdaDecay, double _reward, double _rewardDecay, 
 			double _alpha, double _gamma, double _seedMin, 
-			double _seedMax, double _seedReward, int _startX, int _startY, int _goalX, int _goalY,
+			double _seedMax, double _seedReward, int _startX, int _startY, int _R, Integer _C, int _numRuns, int _numMoves, int _goalX, int _goalY,
 			int _counter, int _clock, int _runs, Square[][] _qtable) {
 		lambda = _lambda;
 		lambdaDecay = _lambdaDecay;
@@ -78,6 +80,10 @@ public class SavedMap implements Serializable {
 		clock = _clock;
 		runs = _runs;
 		qtable = _qtable;		
+		r = _R;
+		c = _C;
+		numMoves = _numMoves;
+		numRuns = _numRuns;
 	}
 	
 	
@@ -353,6 +359,28 @@ public class SavedMap implements Serializable {
 	public static long getSerialversionuid() {
 		return serialVersionUID;
 	}
+	
+	
+
+	public int getNumRuns() {
+		return numRuns;
+	}
+
+
+	public void setNumRuns(int numRuns) {
+		this.numRuns = numRuns;
+	}
+
+
+	public int getNumMoves() {
+		return numMoves;
+	}
+
+
+	public void setNumMoves(int numMoves) {
+		this.numMoves = numMoves;
+	}
+
 
 	@Override
 	public String toString() {
