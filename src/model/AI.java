@@ -3,6 +3,8 @@ package model;
 import java.awt.Checkbox;
 import java.util.Random;
 
+import com.sun.org.apache.xerces.internal.impl.dv.ValidatedInfo;
+
 import application.Main;
 
 /*
@@ -24,7 +26,7 @@ public class AI {
 			seedMin, // initial seed for the Min value of the qtable weight
 			seedMax, // initial seed for the Max value of the qtable weight
 			rewardDecay;
-	private boolean moveLeft, moveRight, moveUp, moveDown, foundGoal, random;
+	private boolean moveLeft, moveRight, moveUp, moveDown, foundGoal, random, leftValid, rightValid, upValid, downValid;
 
 	// ==============================================================================
 	// constructors
@@ -70,12 +72,12 @@ public class AI {
 				double result = seedMin + (rand * (seedMax - seedMin));
 				qtable[r][c] = new Square(r,c);
 				qtable[r][c].setWeight(result);
-				System.out.println("double random value: " + rand
-						+ "  random number: " + result + " seeded value = "
-						+ qtable[r][c].getWeight());
+				//System.out.println("double random value: " + rand
+				//		+ "  random number: " + result + " seeded value = "
+				//		+ qtable[r][c].getWeight());
 				qtable[r][c].setReward(seedReward);
-				System.out.println("QTable[" + r + "][" + c + "] toString: "
-						+ qtable[r][c].toString());
+				//System.out.println("QTable[" + r + "][" + c + "] toString: "
+				//		+ qtable[r][c].toString());
 			}
 		}
 	}
@@ -94,35 +96,12 @@ public class AI {
 					qtable[r][c].setWeight(0);
 					qtable[r][c].setColor("DARKGREY");
 					qtable[r][c].setWeight(0);
-					qtable[r][c].setScaleFactorX(0);
-					qtable[r][c].setScaleFactorY(0);
 				} else {
 					qtable[r][c].setColor("LIGHTGRAY");
-					double dir = 270, value = getLeft(r, c), leftX, rightX, upY, downY, rayX, rayY, magnitude;
-					moveLeft = true;
-					if(value < getRight(r, c)){
-						value = getRight(r, c);
-						dir = 90;
-						moveRight = true;
-						moveLeft = false;
-					}
-					if (value < getUp(r, c)){
-						value = getUp(r, c);
-						dir = 0;
-						moveUp = true;
-						moveLeft = false;
-						moveRight = false;
-					}
-					if (value < getDown(r, c)){
-						value = getDown(r, c);
-						dir = 180;
-						moveDown = true;
-						moveUp = false;
-						moveLeft = false;
-						moveRight = false;
-					}
-					
+					qtable[r][c].setMoves();
+					qtable[r][c].setDirection();
 				}
+				System.out.println("test");
 			}
 		}
 	}
@@ -135,13 +114,13 @@ public class AI {
 		} else {
 			random = true;
 		}
-		System.out.println("Check random move in model.AI: " + result
-				+ " Lambda= " + lambda + "Random? " + random);
+		//System.out.println("Check random move in model.AI: " + result
+			//	+ " Lambda= " + lambda + "Random? " + random);
 
 	}
 
 	public void makeMove(int r, int c) {
-		System.out.println("RC [" + r + "][" + c + "]");
+		//System.out.println("RC [" + r + "][" + c + "]");
 		// checkRandom();
 		checkRandom();
 		setDirection(r, c, random);
@@ -169,13 +148,13 @@ public class AI {
 			while (selectingRandomMove) {
 				Random rNum = new Random();
 				int move = rNum.nextInt(4);
-				System.out.println("Random move is true: move is: " + move
-						+ " 0 = left: 1 = right: 2 = up: 3 = down");
+				//System.out.println("Random move is true: move is: " + move
+				//		+ " 0 = left: 1 = right: 2 = up: 3 = down");
 				switch (move) {
 					case 0:
 						if ((r - 1 < 0) || qtable[(r - 1)][c].isWall()) {
-							System.out.println("Left move is a Wall = ["
-									+ (r - 1) + "][" + c + "]");
+							//System.out.println("Left move is a Wall = ["
+							//		+ (r - 1) + "][" + c + "]");
 						} else {
 							selectingRandomMove = false;
 							moveLeft = true;
@@ -184,15 +163,15 @@ public class AI {
 							if (qtable[nextR][nextC].isGoal()) {
 								foundGoal = true;
 							}
-							System.out.println("Left move is Valid = [" + nextR
-									+ "][" + nextC + "]  foundGoal: "
-									+ foundGoal);
+							//System.out.println("Left move is Valid = [" + nextR
+							//		+ "][" + nextC + "]  foundGoal: "
+							//		+ foundGoal);
 						}
 						break;
 					case 1:
 						if ((r + 1) >= Main.ROWS || qtable[(r + 1)][c].isWall()) {
-							System.out.println("Right move is a Wall = ["
-									+ (r + 1) + "][" + c + "]");
+							//System.out.println("Right move is a Wall = ["
+							//		+ (r + 1) + "][" + c + "]");
 						} else {
 							selectingRandomMove = false;
 							moveRight = true;
@@ -201,15 +180,15 @@ public class AI {
 							if (qtable[nextR][nextC].isGoal()) {
 								foundGoal = true;
 							}
-							System.out.println("Right move is Valid = ["
-									+ nextR + "][" + nextC + "]  foundGoal: "
-									+ foundGoal);
+							//System.out.println("Right move is Valid = ["
+							//		+ nextR + "][" + nextC + "]  foundGoal: "
+							//		+ foundGoal);
 						}
 						break;
 					case 2:
 						if ((c - 1) < 0 || qtable[r][(c - 1)].isWall()) {
-							System.out.println("Up move is a Wall = [" + r
-									+ "][" + (c - 1) + "]");
+							//System.out.println("Up move is a Wall = [" + r
+							//		+ "][" + (c - 1) + "]");
 						} else {
 							selectingRandomMove = false;
 							moveUp = true;
@@ -218,15 +197,15 @@ public class AI {
 							if (qtable[nextR][nextC].isGoal()) {
 								foundGoal = true;
 							}
-							System.out.println("Up move is Valid = [" + nextR
-									+ "][" + nextC + "]  foundGoal: "
-									+ foundGoal);
+							//System.out.println("Up move is Valid = [" + nextR
+							//		+ "][" + nextC + "]  foundGoal: "
+							//		+ foundGoal);
 						}
 						break;
 					case 3:
 						if ((c + 1) >= Main.COLUMNS || qtable[r][(c + 1)].isWall()) {
-							System.out.println("Down move is a Wall = [" + r
-									+ "][" + (c + 1) + "]");
+							//System.out.println("Down move is a Wall = [" + r
+							//		+ "][" + (c + 1) + "]");
 						} else {
 							selectingRandomMove = false;
 							moveDown = true;
@@ -235,9 +214,9 @@ public class AI {
 							if (qtable[nextR][nextC].isGoal()) {
 								foundGoal = true;
 							}
-							System.out.println("Up move is Valid = [" + nextR
-									+ "][" + nextC + "]  foundGoal: "
-									+ foundGoal);
+							//System.out.println("Up move is Valid = [" + nextR
+							//		+ "][" + nextC + "]  foundGoal: "
+							//		+ foundGoal);
 						}
 						break;
 					default:
@@ -248,146 +227,48 @@ public class AI {
 					}
 			}
 		} else {
-			double qVal;
-			left = getLeft(r, c);
-			System.out.println("qtable[" + r + "][" + c + "] left weight = "
-					+ left);
-			qVal = left;
-			moveLeft = true;
-			moveRight = false;
-			moveDown = false;
-			moveUp = false;
-			right = getRight(r, c);
-			System.out.println("qtable[" + r + "][" + c + "] right weight = "
-					+ right);
-			up = getUp(r, c);
-			System.out.println("qtable[" + r + "][" + c + "] up weight = "
-					+ up);
-			down = getDown(r, c);
-			System.out.println("qtable[" + r + "][" + c + "] down weight = "
-					+ down);
-			if (right > qVal) {
-				moveRight = true;
-				moveLeft = false;
-				moveDown = false;
-				moveUp = false;
-				qVal = right;
-			}
-			if (up > qVal) {
-				moveUp = true;
-				moveRight = false;
-				moveLeft = false;
-				moveDown = false;
-				qVal = up;
-			}
-			if (down > qVal) {
-				qVal = down;
-				moveDown = true;
-				moveUp = false;
-				moveLeft = false;
-				moveRight = false;
-			}
-			System.out.println("Left:" + moveLeft + " right: " + moveRight + " up: " + moveUp + " down: " + moveDown);
-			if (moveLeft) {
-				if (qtable[(r - 1)][c].isWall()) {
-					System.out.println("Left move is a Wall = [" + (r - 1)
-							+ "][" + c + "]");
-				} else {
-					moveLeft = true;
-					nextR = (r - 1);
-					nextC = c;
-					if (qtable[nextR][nextC].isGoal()) {
-						foundGoal = true;
-					}
-					qtable[r][c].setDirection(270);
-					System.out.println("Left move is Valid = [" + nextR + "]["
-							+ nextC + "]  foundGoal: " + foundGoal);
-				}
-			}
-			if (moveRight) {
-				if (qtable[(r + 1)][c].isWall()) {
-					System.out.println("Right move is a Wall = [" + (r + 1)
-							+ "][" + c + "]");
-				} else {
-					moveRight = true;
-					nextR = (r + 1);
-					nextC = c;
-					if (qtable[nextR][nextC].isGoal()) {
-						foundGoal = true;
-					}
-					qtable[r][c].setDirection(90);
-					System.out.println("Right move is Valid = [" + nextR + "]["
-							+ nextC + "]  foundGoal: " + foundGoal);
-				}
-			}
-			if (moveUp) {
-				if (qtable[r][(c - 1)].isWall()) {
-					System.out.println("Up move is a Wall = [" + r + "]["
-							+ (c - 1) + "]");
-				} else {
-					moveUp = true;
-					nextR = r;
-					nextC = (c - 1);
-					if (qtable[nextR][nextC].isGoal()) {
-						foundGoal = true;
-						System.out.println("Up move is Valid = [" + nextR
-								+ "][" + nextC + "]  foundGoal: " + foundGoal);
-					}
-					qtable[r][c].setDirection(0);
-					System.out.println("Up move is Valid = [" + nextR
-							+ "][" + nextC + "]  foundGoal: "
-							+ foundGoal);
-				}
-			}
-			if (moveDown) {
-				if (qtable[r][(c + 1)].isWall()) {
-					System.out.println("Down move is a Wall = [" + r
-							+ "][" + (c + 1) + "]");
-				} else {
-					moveDown = true;
-					nextR = r;
-					nextC = (c + 1);
-					if (qtable[nextR][nextC].isGoal()) {
-						foundGoal = true;
-					}
-					qtable[r][c].setDirection(180);
-					System.out.println("Down move is Valid = [" + nextR
-							+ "][" + nextC + "]  foundGoal: "
-							+ foundGoal);
-				}
-			}
-		}
-	
-		
+			qtable[r][c].getDirection();
+			nextR = qtable[r][c].getMoveR();
+			nextC = qtable[r][c].getMoveC();
+			foundGoal = qtable[r][c].isMoveIsGoal();
+		}	
 	}
 
 	
 	
 	public double getLeft(int r, int c) {
 		if (r > 0) {
+			leftValid = !qtable[r - 1][c].isWall();
 			return qtable[r - 1][c].getWeight();
 		}
+		leftValid = false;
 		return 0.0;
 	}
 
 	public double getRight(int r, int c) {
 		if (r < Main.ROWS - 1) {
+			rightValid = !qtable[r + 1][c].isWall();
 			return qtable[r + 1][c].getWeight();
 		}
+		rightValid = false;
 		return 0.0;
 	}
 
 	public double getUp(int r, int c) {
 		if (c > 0) {
+			upValid = !qtable[r][c - 1].isWall();
 			return qtable[r][c - 1].getWeight();
 		}
+		upValid = false;
 		return 0.0;
 	}
 
 	public double getDown(int r, int c) {
 		if (c < Main.COLUMNS - 1) {
+			downValid = !qtable[r][c + 1].isWall();
 			return qtable[r][c + 1].getWeight();
 		}
+		downValid = false;
 		return 0.0;
 	}
 
@@ -504,6 +385,14 @@ public class AI {
 
 	public void setRewardDecay(double rewardDecay) {
 		this.rewardDecay = rewardDecay;
+	}
+
+	public boolean isRandom() {
+		return random;
+	}
+
+	public void setRandom(boolean random) {
+		this.random = random;
 	}
 
 }

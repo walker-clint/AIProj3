@@ -76,6 +76,11 @@
               </font>
             </Label>
             <Label font="$x6" layoutX="126.0" layoutY="216.0" text="Times" />
+            <Button layoutX="40.0" layoutY="246.0" mnemonicParsing="false" onAction="#resetRunsPressed" text="Reset Runs">
+              <font>
+                <Font name="Arial Bold" size="12.0" fx:id="x7" />
+              </font>
+            </Button>
           </children>
         </Pane>
       </right>
@@ -106,11 +111,7 @@
                 <Font name="Arial Bold" size="16.0" fx:id="x5" />
               </font>
             </Button>
-            <Label id="startRLabel" layoutX="891.0" layoutY="42.0" prefWidth="33.0" text="Row:">
-              <font>
-                <Font name="Arial Bold" size="12.0" fx:id="x7" />
-              </font>
-            </Label>
+            <Label id="startRLabel" font="$x7" layoutX="891.0" layoutY="42.0" prefWidth="33.0" text="Row:" />
             <Label id="startCLabel" font="$x2" layoutX="870.0" layoutY="64.0" text="Column:" />
             <Label font="$x2" layoutX="895.0" layoutY="22.0" text="Goal Position" />
             <Label layoutX="103.0" layoutY="76.0" text="Q(s,a)  ←  Q(s,a)  +  α        (R(s)   +   γ    Q(s',a' )   -    Q(s,a))">

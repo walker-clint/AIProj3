@@ -19,6 +19,7 @@ import java.util.ResourceBundle;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import com.sun.jmx.snmp.Timestamp;
 import com.sun.xml.internal.ws.wsdl.writer.document.StartWithExtensionsType;
 
 import model.AI;
@@ -184,6 +185,9 @@ public class GameBoardController implements Initializable, ControlledScreen {
 				Main.MACHINE.qtable[goalR][goalC].setReward(reward);
 				if(random){
 					setStartPos();
+					moves.add(new Move(startR,startC));
+				} else {
+					moves.add(new Move(startR,startC));
 				}
 				buildArrows();
 				updateBoard();
@@ -282,6 +286,11 @@ public class GameBoardController implements Initializable, ControlledScreen {
 	}
 	
 	@FXML
+	void resetRunsPressed(ActionEvent event){
+		runs = 0;
+	}
+	
+	@FXML
 	void pausePressed(ActionEvent event){
 		System.out.println("Paused Pressed pause = " + paused + " before button press. Stepping = " + stepping);
 		if (paused){
@@ -372,25 +381,25 @@ public class GameBoardController implements Initializable, ControlledScreen {
 				if (goalR == r && goalC == c){
 					 Main.MACHINE.qtable[r][c].setColor("CORNFLOWERBLUE");
 					 rectangles[r][c].setFill(Color.CORNFLOWERBLUE);
-					 System.out.println("QTable[" + r + "][" + c + "] " + Main.MACHINE.qtable[r][c].toString());
+					// System.out.println("QTable[" + r + "][" + c + "] " + Main.MACHINE.qtable[r][c].toString());
 				} else if ( Main.MACHINE.qtable[r][c].isWall()){
-					System.out.println("QTable[" + r + "][" + c + "] " + Main.MACHINE.qtable[r][c].toString());
+					//System.out.println("QTable[" + r + "][" + c + "] " + Main.MACHINE.qtable[r][c].toString());
 					Main.MACHINE.qtable[r][c].setColor("DARKGREY");
 					 rectangles[r][c].setFill(Color.DARKGREY);
 				} else {
-					System.out.println("QTable[" + r + "][" + c + "] " + Main.MACHINE.qtable[r][c].toString());
+					//System.out.println("QTable[" + r + "][" + c + "] " + Main.MACHINE.qtable[r][c].toString());
 					Main.MACHINE.qtable[r][c].setColor("LIGHTGRAY");
 					rectangles[r][c].setFill(Color.LIGHTGRAY);
 					arrows[r][c].setRotate(Main.MACHINE.qtable[r][c].getDirection());
-					arrows[r][c].setScaleX(Main.SCALE_ADJUSTMENT_FACTOR * Main.MACHINE.qtable[r][c].getScaleFactorX());
-					arrows[r][c].setScaleY(Main.SCALE_ADJUSTMENT_FACTOR * Main.MACHINE.qtable[r][c].getScaleFactorY());
+					arrows[r][c].setScaleX(Main.SCALE_ADJUSTMENT_FACTOR * Main.MACHINE.qtable[r][c].getScaleFactor());
+					arrows[r][c].setScaleY(Main.SCALE_ADJUSTMENT_FACTOR * Main.MACHINE.qtable[r][c].getScaleFactor());
 					arrows[r][c].setLayoutX((35 * r) + offsetX); //remove after testing
 					arrows[r][c].setLayoutY((35 * c) + offsetY); //remove after testing
 					
 				}
 			}
 		}
-		System.out.println("STOP RESET BOARD COLORS");
+		//System.out.println("STOP RESET BOARD COLORS");
 	}
 	
 	void saveMap(String fileName){
@@ -407,22 +416,22 @@ public class GameBoardController implements Initializable, ControlledScreen {
 		for (int c = 0; c < Main.COLUMNS; c++){
 			for (int r = 0; r < Main.ROWS; r++){
 				if (goalR == r && goalC == c){
-					System.out.println("QTable[" + r + "][" + c + "] " + Main.MACHINE.qtable[r][c].toString());
+					//System.out.println("QTable[" + r + "][" + c + "] " + Main.MACHINE.qtable[r][c].toString());
 				} else if ( Main.MACHINE.qtable[r][c].isWall()){
-					System.out.println("QTable[" + r + "][" + c + "] " + Main.MACHINE.qtable[r][c].toString());
+					//System.out.println("QTable[" + r + "][" + c + "] " + Main.MACHINE.qtable[r][c].toString());
 				} else {
-					System.out.println("QTable[" + r + "][" + c + "] " + Main.MACHINE.qtable[r][c].toString());
+					//System.out.println("QTable[" + r + "][" + c + "] " + Main.MACHINE.qtable[r][c].toString());
 					
 					arrows[r][c].setRotate(Main.MACHINE.qtable[r][c].getDirection());
-					arrows[r][c].setScaleX(Main.SCALE_ADJUSTMENT_FACTOR * Main.MACHINE.qtable[r][c].getScaleFactorX());
-					arrows[r][c].setScaleY(Main.SCALE_ADJUSTMENT_FACTOR * Main.MACHINE.qtable[r][c].getScaleFactorY());
+					arrows[r][c].setScaleX(Main.SCALE_ADJUSTMENT_FACTOR * Main.MACHINE.qtable[r][c].getScaleFactor());
+					arrows[r][c].setScaleY(Main.SCALE_ADJUSTMENT_FACTOR * Main.MACHINE.qtable[r][c].getScaleFactor());
 					arrows[r][c].setLayoutX((35 * r) + offsetX); //remove after testing
 					arrows[r][c].setLayoutY((35 * c) + offsetY); //remove after testing
 					
 				}
 			}
 		}
-		System.out.println("UPDATE BOARD STOP");
+		//System.out.println("UPDATE BOARD STOP");
 	}
 	
 	void buildRectangles(){
@@ -472,8 +481,8 @@ public class GameBoardController implements Initializable, ControlledScreen {
 					arrows[r][c].getPoints().addAll(new Double[] {-40.0, 40.0, 40.0, 40.0, 0.0, -60.0});
 					arrows[r][c].setFill(Color.BLACK);
 					arrows[r][c].setRotate(0);
-					arrows[r][c].setScaleX(.15 * Main.SCALE_ADJUSTMENT_FACTOR);
-					arrows[r][c].setScaleY(.15 * Main.SCALE_ADJUSTMENT_FACTOR);
+					arrows[r][c].setScaleX(.005 * Main.SCALE_ADJUSTMENT_FACTOR);
+					arrows[r][c].setScaleY(.005 * Main.SCALE_ADJUSTMENT_FACTOR);
 					arrows[r][c].setLayoutX((35 * r) + offsetX);
 					arrows[r][c].setLayoutY((35 * c) + offsetY);
 					rectangles[r][c].setFill(Color.BLUEVIOLET);
@@ -485,8 +494,8 @@ public class GameBoardController implements Initializable, ControlledScreen {
 					arrows[r][c].getPoints().addAll(new Double[] {-40.0, 40.0, 40.0, 40.0, 0.0, -60.0});
 					arrows[r][c].setFill(Color.BLACK);
 					arrows[r][c].setRotate(0);
-					arrows[r][c].setScaleX(.15 * Main.SCALE_ADJUSTMENT_FACTOR);
-					arrows[r][c].setScaleY(.15 * Main.SCALE_ADJUSTMENT_FACTOR );
+					arrows[r][c].setScaleX(.005 * Main.SCALE_ADJUSTMENT_FACTOR);
+					arrows[r][c].setScaleY(.005 * Main.SCALE_ADJUSTMENT_FACTOR );
 					arrows[r][c].setLayoutX((35 * r) + offsetX);
 					arrows[r][c].setLayoutY((35 * c) + offsetY);
 				}
@@ -529,21 +538,21 @@ public class GameBoardController implements Initializable, ControlledScreen {
 		deleteRectangles();
 		buildRectangles();
 		lambda = 0;
-		lambdaField.setText("0");
+		lambdaField.setText("90");
 		lambdaDecay = 0;
-		lambdaDecayField.setText("0");
+		lambdaDecayField.setText("0.01");
 		reward = 0;
-		rewardField.setText("0");
+		rewardField.setText("1");
 		rewardDecay = 0;
-		rewardDecayField.setText("0");
+		rewardDecayField.setText("0.001");
 		alpha = 0;
-		alphaField.setText("0");
+		alphaField.setText("0.3");
 		gamma = 0;
-		gammaField.setText("0");
+		gammaField.setText("0.7");
 		goalR = 0;
-		goalRField.setText("0");
+		goalRField.setText("10");
 		goalC = 0;
-		goalCField.setText("0");
+		goalCField.setText("10");
 		started = false;
 		startButton.setVisible(true);
 		paused= false;
@@ -764,7 +773,7 @@ public class GameBoardController implements Initializable, ControlledScreen {
 	public void makeWalls(){
 		int blockX, blockY;
 		int numBlocks = (int)(0.1 * (Main.COLUMNS * Main.ROWS));
-		System.out.println("the number of blocks = " + numBlocks);
+		//System.out.println("the number of blocks = " + numBlocks);
 		for (int i = 0; i < numBlocks; i++){
 			Random num = new Random();
 			
@@ -778,7 +787,7 @@ public class GameBoardController implements Initializable, ControlledScreen {
 				Main.MACHINE.qtable[blockX][blockY].setWall(true);
 				Main.MACHINE.qtable[blockX][blockY].setColor("DARKGREY");
 				rectangles[blockX][blockY].setFill(colorTable.get(Color.DARKGREY));
-				System.out.println("blockX: " + blockX + "  blockY: " + blockY + "isWall: " + Main.MACHINE.qtable[blockX][blockY].isWall() + " Color: " +  Main.MACHINE.qtable[blockX][blockY].getColor());
+				//System.out.println("blockX: " + blockX + "  blockY: " + blockY + "isWall: " + Main.MACHINE.qtable[blockX][blockY].isWall() + " Color: " +  Main.MACHINE.qtable[blockX][blockY].getColor());
 			}
 		}
 	}
@@ -912,23 +921,26 @@ public class GameBoardController implements Initializable, ControlledScreen {
 							runTimerLabel.setText("" + clock);
 						}
 						if ((speedCounter == speed && !paused) || stepping){ // one second clock
-							System.out.println("pre-move location: [" + R + "][" + C + "]");
-							
+							//System.out.println("pre-move location: [" + R + "][" + C + "]");
+							int 	nextR, nextC;
+						
 							Main.MACHINE.qtable[R][C].setColor("DARKSLATEBLUE");
 							rectangles[R][C].setFill(Color.DARKSLATEBLUE);
 							Main.MACHINE.makeMove(R, C);
-							int 	nextR = Main.MACHINE.getNextR(),
-									nextC = Main.MACHINE.getNextC();
-							System.out.println("Goal is found= " + Main.MACHINE.isFoundGoal());
+							nextR = Main.MACHINE.getNextR();
+							nextC = Main.MACHINE.getNextC();
+							//System.out.println("Goal is found= " + Main.MACHINE.isFoundGoal());
 							if(!currentLambdaLabel.isVisible())	{
 								currentLambdaLabel.setVisible(true);
 							}
 							lambdaField.setText(Main.MACHINE.getLambda() + "");
-							Main.MACHINE.qtable[R][C].updateWeight(nextR, nextC);
-							Main.MACHINE.qtable[R][C].updateSquareDisplay();
+							/*if(!Main.MACHINE.isRandom()){
+								Main.MACHINE.qtable[R][C].updateWeight(nextR, nextC);
+								Main.MACHINE.qtable[R][C].updateSquareDisplay();
+							}*/
 							R = nextR;
 							C = nextC;
-							System.out.println("move location: [" + R + "][" + C + "]");
+							//System.out.println("move location: [" + R + "][" + C + "]");
 							if (!Main.MACHINE.qtable[R][C].isGoal()){
 								Main.MACHINE.qtable[R][C].setColor("BLUEVIOLET");
 								rectangles[R][C].setFill(Color.BLUEVIOLET);
@@ -936,26 +948,31 @@ public class GameBoardController implements Initializable, ControlledScreen {
 							moves.add(new Move(R,C));
 							numberOfMoves++;
 							movesLabel.setText(numberOfMoves + "");
-
 							
 							if(Main.MACHINE.isFoundGoal() || (R == goalR && C == goalC)){
 								runs++;
 								numberOfMoves = 0;
 								numberOfRunsLabel.setText("" + runs);
 								//unwind the reward back through the linked list or queue
-								if (moves.size() > 1){
-									for (int i = moves.size() - 2; i >= 0; i--){
-										System.out.print("Unwind i= " + i + " :: " + moves.get(i).toString() + "  start reward: " + Main.MACHINE.qtable[moves.get(i).getR()][moves.get(i).getC()].getReward() + "\n\t Start Weight= " + Main.MACHINE.qtable[moves.get(i).getR()][moves.get(i).getC()].getWeight());
-										;
+								if (moves.size() > 2){
+									int endUnwind;
+									if (moves.size() > 102){
+										endUnwind = moves.size() - 2 - 100;
+									} else {
+										endUnwind = moves.size() - 2;
+									}
+									for (int i = moves.size() - 2; i >= endUnwind; i--){
 										int locR = moves.get(i).getR();
 										int lastR = moves.get(i+1).getR();
 										int locC = moves.get(i).getC();
 										int lastC = moves.get(i+1).getC();
-										System.out.print("Unwind i= " + i + " :: " + moves.get(i).toString() + "  start reward: " + Main.MACHINE.qtable[locR][locC].getReward() 
-												+ "\n\t Start Weight= " + Main.MACHINE.qtable[locR][locC].getWeight());
-										;
+										rectangles[locR][locC].setFill(Color.PINK);
+										rectangles[lastR][lastC].setFill(Color.BROWN);
+										System.out.print("Unwind i= " + i + " ::\n" + moves.get(i).toString() + "  start reward: " + Main.MACHINE.qtable[locR][locC].getReward() 
+												+ "\n\t Start Weight= " + Main.MACHINE.qtable[locR][locC].getWeight() + "\n" + moves.get(i+1).toString());
 										Main.MACHINE.qtable[locR][locC].updateReward(lastR, lastC);
-				
+										Main.MACHINE.qtable[locR][locC].updateWeight(lastR, lastC);
+										Main.MACHINE.qtable[locR][locC].updateSquareDisplay();
 										System.out.print("  rewardvalue: " + Main.MACHINE.qtable[locR][locC].getReward() 
 												+ "  startReward after decay " + Main.MACHINE.qtable[locR][locC].getReward() 
 												+ "\n\t end Weight= " + Main.MACHINE.qtable[locR][locC].getWeight()+ "\n");
@@ -965,6 +982,7 @@ public class GameBoardController implements Initializable, ControlledScreen {
 								resetMapColors();
 								//choose new starting point
 								setStartPos();
+								moves.add(new Move(startR,startC));
 								System.out.println("New Start Pos= [" + startR + "][" + startC + "]" );
 								
 								rectangles[startR][startC].setFill(Color.BLUEVIOLET);

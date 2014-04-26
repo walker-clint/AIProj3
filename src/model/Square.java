@@ -8,6 +8,7 @@ package model;
 
 import java.io.Serializable;
 
+import javafx.scene.paint.Color;
 import application.Main;
 
 
@@ -18,15 +19,18 @@ public class Square implements Serializable {
 	private static final long serialVersionUID = 1L;
 	//==============================================================================
 	// variables
-	private 	int				r, c;
+	private 	int				r, c, moveR, moveC;
 	private 	double			reward,
 								weight,
-								scaleFactorX,
-								scaleFactorY,
+								scaleFactor,
 								direction,
-								rotation;
+								rotation,
+								magnitude,
+								left, right, up, down;
+	
 	private		boolean			isGoal,
-								isWall;
+								isWall,
+								leftValid, rightValid, upValid, downValid, moveIsGoal;
 	private 	String			color;
 	
 	//==============================================================================
@@ -37,8 +41,7 @@ public class Square implements Serializable {
 		c = 0;
 		reward = 0;
 		weight = 0;
-		scaleFactorX = 1;
-		scaleFactorY = 1;
+		scaleFactor = 1;
 		direction = 0;
 		isGoal = false;
 		isWall = false;
@@ -51,8 +54,7 @@ public class Square implements Serializable {
 		c = _c;
 		reward = 0;
 		weight = 0;
-		scaleFactorX = 1;
-		scaleFactorY = 1;
+		scaleFactor = .001;
 		direction = 0;
 		isGoal = false;
 		isWall = false;
@@ -75,36 +77,58 @@ public class Square implements Serializable {
 	public void setWeight(double weight) {
 		this.weight = weight;
 	}
-	public double getScaleFactorX() {
-		return scaleFactorX;
+	
+	public double getScaleFactor() {
+		return scaleFactor;
 	}
-	public void setScaleFactorX(double scaleFactorX) {
-		if(scaleFactorX < .01){
-			this.scaleFactorX = .01;
-		} else if(scaleFactorX > .1){ 
-			this.scaleFactorX = .1;
+	public void setScaleFactor(double scaleFactor) {
+		if(scaleFactor < .03){
+			if (scaleFactor > .0000001 && scaleFactor < .000001){
+				Main.GBC.arrows[r][c].setFill(Color.RED);
+				this.scaleFactor = .07;
+			} else if (scaleFactor > .000001 && scaleFactor < .000005){
+				Main.GBC.arrows[r][c].setFill(Color.CORNFLOWERBLUE);
+				this.scaleFactor = .08;
+			} else if (scaleFactor > .000005 && scaleFactor < .00001){
+				Main.GBC.arrows[r][c].setFill(Color.CORNFLOWERBLUE);
+				this.scaleFactor = .09;
+			} else if (scaleFactor > .00001 && scaleFactor < .00012){
+				Main.GBC.arrows[r][c].setFill(Color.CORNFLOWERBLUE);
+				this.scaleFactor = .1;
+			} else if (scaleFactor > .00012 && scaleFactor < .0016){
+				Main.GBC.arrows[r][c].setFill(Color.CORNFLOWERBLUE);
+				this.scaleFactor = .12;
+			} else if (scaleFactor > .0016 && scaleFactor < .03){
+				Main.GBC.arrows[r][c].setFill(Color.CORNFLOWERBLUE);
+				this.scaleFactor = .14;
+			} else {
+				this.scaleFactor = .06;
+				Main.GBC.arrows[r][c].setFill(Color.BLACK);
+			}
+		} else if(scaleFactor > .2){ 
+			this.scaleFactor = .2;
+			Main.GBC.arrows[r][c].setFill(Color.CORNFLOWERBLUE);
+		} else if(scaleFactor > .03 && scaleFactor <= .07){
+			this.scaleFactor = .15;
+			Main.GBC.arrows[r][c].setFill(Color.CORNFLOWERBLUE);
+		} else if(scaleFactor > .07 && scaleFactor <= .09){
+			this.scaleFactor = .16;
+			Main.GBC.arrows[r][c].setFill(Color.CORNFLOWERBLUE);
+		} else if(scaleFactor > .09 && scaleFactor <= .11){
+			this.scaleFactor = .17;
+			Main.GBC.arrows[r][c].setFill(Color.CORNFLOWERBLUE);
+		} else if(scaleFactor > .11 && scaleFactor <= .2){
+			this.scaleFactor = .19;
+			Main.GBC.arrows[r][c].setFill(Color.CORNFLOWERBLUE);
 		} else {
-			this.scaleFactorX = scaleFactorX;
-		}
-	}
-	public double getScaleFactorY() {
-		return scaleFactorY;
-	}
-	public void setScaleFactorY(double scaleFactorY) {
-		if(scaleFactorY < .01){
-			this.scaleFactorY = .01;
-		} else if(scaleFactorY > .1){ 
-			this.scaleFactorY = .1;
-		} else {
-			this.scaleFactorY = scaleFactorY;
+			this.scaleFactor = scaleFactor;
+			Main.GBC.arrows[r][c].setFill(Color.BLACK);
 		}
 	}
 	public double getDirection() {
 		return direction;
 	}
-	public void setDirection(double direction) {
-		this.direction = direction;
-	}
+	
 	public boolean isGoal() {
 		return isGoal;
 	}
@@ -129,28 +153,60 @@ public class Square implements Serializable {
 	public void setWall(boolean isWall) {
 		this.isWall = isWall;
 	}
-	
+	public int getMoveR() {
+		return moveR;
+	}
+	public void setMoveR(int moveR) {
+		this.moveR = moveR;
+	}
+	public int getMoveC() {
+		return moveC;
+	}
+	public void setMoveC(int moveC) {
+		this.moveC = moveC;
+	}
+	public boolean isMoveIsGoal() {
+		return moveIsGoal;
+	}
+	public void setMoveIsGoal(boolean moveIsGoal) {
+		this.moveIsGoal = moveIsGoal;
+	}
 	
 	//==============================================================================
 	// methods
 
 	public void updateReward(int lastR, int lastC){
 		double rewardFromLastPosition = Main.MACHINE.qtable[lastR][lastC].getReward();
-		reward = rewardFromLastPosition + (0.5 * ( rewardFromLastPosition - reward));
+		double stepone = (rewardFromLastPosition - reward);
+		System.out.print("\nReward update: [" + r + "][" + c + "] is " + reward + " + (" + Main.GBC.getRewardDecay() +  " * " + rewardFromLastPosition + " - " + reward + " ) = "  );
+		reward = reward + (Main.GBC.getRewardDecay() * ( rewardFromLastPosition - reward));
+		System.out.print( reward + "\n" );
+		
 	}
 	
 	public void updateWeight(int nextR, int nextC){
-		System.out.println("update weight in location [" + r +  "][" + c + "]");
+		System.out.println("update weight in location [" + r +  "][" + c + "] current Weight= " + weight);
 		double alpha = Main.GBC.getAlpha();
 		double gamma = Main.GBC.getGamma();
-		double stepOne = Main.MACHINE.qtable[nextR][nextC].getWeight() - weight;
+		double oldWeight = weight;
+		double stepOne = (gamma * Main.MACHINE.qtable[nextR][nextC].getWeight() );
 		System.out.println("stepone value: " + stepOne);
-		double stepTwo = gamma * stepOne;
+		double stepTwo =  stepOne - weight;
 		System.out.println("steptwo value: " + stepTwo);
 		double stepThree = reward + stepTwo;
 		double stepFour = alpha * stepThree;
-		double stepFive = reward + stepFour;
-		reward = stepFive;
+		double stepFive = weight + stepFour;
+		weight = stepFive;
+		System.out.println(weight + " = (" + oldWeight + " + " + alpha + "( " + reward + " + " + gamma + "*" + Main.MACHINE.qtable[nextR][nextC].getWeight() + " - " + weight + ")"  );
+		System.out.println(weight + " = (" + oldWeight + " + " + alpha + "( " + reward + " + " + stepOne + " - " + weight + ")"  );
+		System.out.println(weight + " = (" + oldWeight + " + " + alpha + "( " + reward + " + " + stepTwo + ")"  );
+		System.out.println(weight + " = (" + oldWeight + " + " + alpha + "( " + stepThree + ")"  );
+		System.out.println(weight + " = (" + oldWeight + " + " + stepFour + ")"  );
+		System.out.println("new Weight value: " + weight);
+		if (weight < 0){
+			double stopme = 1 + weight;
+			stopme++;
+		}
 		
 	}
 	
@@ -163,18 +219,108 @@ public class Square implements Serializable {
 		double downY = Main.MACHINE.getDown(r, c) * -1;
 		double rayY = Math.abs(upY + downY);
 		
-		double magnitude = Math.sqrt((rayX * rayX) + (rayY * rayY));
+		magnitude = Math.sqrt((rayX * rayX) + (rayY * rayY));
 		magnitude *= 10;
-		setScaleFactorX(magnitude * Main.SCALE_ADJUSTMENT_FACTOR);
-		setScaleFactorY(magnitude * Main.SCALE_ADJUSTMENT_FACTOR);
+		setScaleFactor(reward);
 		setRotation(Math.atan2(rayY, rayX));
+		rotation = rotation * (180.0 / Math.PI);
+		setDirection();
 		System.out.println("Update Display: [" + r + "][" + c + "] dir:" + direction + " mag: " + magnitude + "  Rotation: " + rotation);
+	}
+	
+	public void setDirection(){
+		double lV = 0, rV = 0, uV = 0, dV = 0, val, dir;
+		if(leftValid){
+			lV = Main.MACHINE.qtable[r-1][c].getWeight();
+			if(Main.MACHINE.qtable[r-1][c].isGoal()){
+				lV = 1000000;
+				moveIsGoal = true;
+			}
+		}
+		if(rightValid){
+			rV = Main.MACHINE.qtable[r+1][c].getWeight();
+			if(Main.MACHINE.qtable[r+1][c].isGoal()){
+				rV = 1000000;
+				moveIsGoal = true;
+			}
+		}
+		if(upValid){
+			uV = Main.MACHINE.qtable[r][c-1].getWeight();
+			if(Main.MACHINE.qtable[r][c-1].isGoal()){
+				uV = 1000000;
+				moveIsGoal = true;
+			}
+		}
+		if(downValid){
+			dV = Main.MACHINE.qtable[r][c+1].getWeight();
+			if(Main.MACHINE.qtable[r][c+1].isGoal()){
+				dV = 1000000;
+				moveIsGoal = true;
+			}
+		}
+		if (rV > lV){
+			val = rV;
+			dir = 90;
+		} else {
+			val = lV;
+			dir = 270;
+		}
+		
+		if(uV > val){
+			val = uV;
+			dir = 0;
+		}
+		
+		if(dV > val){
+			val = dV;
+			dir = 180;
+		}
+		direction = dir;
+		if(dir == 270){ //move left
+			moveR = r-1;
+			moveC = c;
+		}
+		if(dir == 90){ //move right
+			moveR = r+1;
+			moveC = c;
+		}
+		if(dir == 0){ //move up
+			moveR = r;
+			moveC = c-1;
+		}
+		if(dir == 180){ //move down
+			moveR = r;
+			moveC = c+1;
+		}
+	}
+	
+	public void setMoves(){
+		if(r-1 >= 0 && !Main.MACHINE.qtable[r-1][c].isWall()){
+			leftValid = true;
+		} else {
+			leftValid = false;
+		}
+		if(r+1 < Main.ROWS && !Main.MACHINE.qtable[r+1][c].isWall()){
+			rightValid = true;
+		} else {
+			rightValid = false;
+		}
+		if(c-1 >= 0 && !Main.MACHINE.qtable[r][c-1].isWall()){
+			upValid = true;
+		} else {
+			upValid = false;
+		}
+		if(c+1 < Main.COLUMNS && !Main.MACHINE.qtable[r][c+1].isWall()){
+			downValid = true;
+		} else {
+			downValid = false;
+		}
 	}
 	
 	@Override
 	public String toString() {
 		return "Square [reward=" + reward + ", weight=" + weight
-				+ ", scaleFactorX=" + scaleFactorX + ", scaleFactorY=" + scaleFactorY + ", direction=" + direction
+				+ ", scaleFactor=" + scaleFactor + ", direction=" + direction
 				+ ", isGoal=" + isGoal + ", isWall=" + isWall + ", color=" + color + "]";
 	}
 	
