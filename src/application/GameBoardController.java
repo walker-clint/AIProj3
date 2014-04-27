@@ -148,7 +148,7 @@ public class GameBoardController implements Initializable, ControlledScreen {
 	void startPressed(ActionEvent event){
 		if(!reseting){
 			System.out.println("Starting without reset");
-			Main.MACHINE = new AI();
+			//Main.MACHINE = new AI();
 			if(getInput()){
 				Main.MACHINE.setAlpha(alpha);
 				Main.MACHINE.setGamma(gamma);
@@ -164,7 +164,6 @@ public class GameBoardController implements Initializable, ControlledScreen {
 				stopButton.setVisible(true);
 				stepButton.setVisible(false);
 				resetButton.setVisible(false);
-				
 				started = true;
 				pausePressed(event);
 			}
