@@ -83,10 +83,10 @@ public class Square implements Serializable {
 	}
 	public void setScaleFactor(double scaleFactor) {
 		if(scaleFactor < .03){
-			if (scaleFactor > .0000001 && scaleFactor < .000001){
+			if (scaleFactor > .0000000001 && scaleFactor < .0000001){
 				Main.GBC.arrows[r][c].setFill(Color.RED);
 				this.scaleFactor = .07;
-			} else if (scaleFactor > .000001 && scaleFactor < .000005){
+			} else if (scaleFactor > .0000001 && scaleFactor < .000005){
 				Main.GBC.arrows[r][c].setFill(Color.CORNFLOWERBLUE);
 				this.scaleFactor = .08;
 			} else if (scaleFactor > .000005 && scaleFactor < .00001){
