@@ -17,6 +17,7 @@ import java.util.Random;
 import java.util.ResourceBundle;
 import java.util.Timer;
 import java.util.TimerTask;
+
 import model.AI;
 import model.SavedMap;
 import model.Move;
@@ -96,6 +97,7 @@ public class GameBoardController implements Initializable, ControlledScreen {
 	@FXML	Button				arrowTypeButton;
 	@FXML	Button				propogationTypeButton;
 	@FXML	Button				lambdaEnabledButton;
+	@FXML	Button				clearDataButton;
 
 	
 	@FXML 	Rectangle			newRectangle;
@@ -169,6 +171,8 @@ public class GameBoardController implements Initializable, ControlledScreen {
 				Main.MACHINE.setLambdaDecay(lambdaDecay);
 				Main.MACHINE.setRewardDecay(rewardDecay);
 				paused = false;
+				stepping = false;
+				clearDataButton.setVisible(false);
 				pauseButton.setVisible(true);
 				startButton.setVisible(false);
 				stopButton.setVisible(true);
@@ -183,6 +187,7 @@ public class GameBoardController implements Initializable, ControlledScreen {
 				System.out.println("Starting with reset");
 				buildColorTable();
 				pauseButton.setVisible(true);
+				clearDataButton.setVisible(false);
 				startButton.setVisible(false);
 				stopButton.setVisible(true);
 				stepButton.setVisible(false);
@@ -221,33 +226,11 @@ public class GameBoardController implements Initializable, ControlledScreen {
 			fileNameField.requestFocus();
 			fileNameField.setText("Enter File Name");
 		} else {
-			saveMap(fileNameField.getText());
+			saveState(fileNameField.getText());
 			fileNameField.setText("File Saved");
 		}
 	}
-	
-	@FXML
-	void loadMapPressed(ActionEvent event){
-		try {
-		 	Main.POPUP_WINDOW.showMessageBox(Main.PRIMARY_STAGE); 
-		 	System.out.println("Load map in try screen name " + Main.SAVE_POPUP_FXML);
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-			System.out.println("Load map in catch screen name " + Main.SAVE_POPUP_FXML);
-		}
-	}
-	
-	@FXML
-	void saveMapPressed(ActionEvent event){
-		if (fileNameField.getText().equals("") || fileNameField.getText().equals("Enter File Name") || fileNameField.getText().equals("File Saved")){
-			fileNameField.requestFocus();
-			fileNameField.setText("Enter File Name");
-		} else {
-			saveMap(fileNameField.getText());
-			fileNameField.setText("File Saved");
-		}
-	}
-	
+		
 	@FXML
 	void loadStatePressed(ActionEvent event){
 		try {
@@ -346,6 +329,7 @@ public class GameBoardController implements Initializable, ControlledScreen {
 			if(!paused){
 				pausePressed(event);
 			}
+			clearDataButton.setVisible(true);
 			startButton.setVisible(true);
 			stopButton.setVisible(false);
 			pauseButton.setVisible(false);
@@ -436,6 +420,11 @@ public class GameBoardController implements Initializable, ControlledScreen {
 			lambdaEnabled = true;
 			lambdaEnabledButton.setText("Enabled");
 		}
+	}
+	
+	@FXML
+	public void clearDataPressed(ActionEvent event){
+		//Main.MACHINE.qtable
 	}
 	
 	//==============================================================================
@@ -626,48 +615,9 @@ public class GameBoardController implements Initializable, ControlledScreen {
 		movesLabel.setText(numberOfMoves + "");
 	}
 	
-	void saveMap(String fileName){
-		SavedMap map = new SavedMap(goalR, goalC, Main.MACHINE.qtable);
-		map.saveMap(map, fileName);
-	}
-	
 	void saveState(String fileName){
 		SavedMap state = new SavedMap(lambda, lambdaDecay, reward, rewardDecay, alpha, gamma, seedMin, seedMax, seedReward, startR, startC, R, C, numRuns, numberOfMoves, goalR, goalC, counter, clock, runs, Main.MACHINE.qtable);
 		state.saveMap(state, fileName);
-	}
-	
-	void loadMap(){
-		//start file load process
-				//display file name in message log
-				//show send message button
-				String fileNameString = "";
-				File file = fileChooser.showOpenDialog(Main.PRIMARY_STAGE);
-				if (file != null) {
-					//openFile(file);
-					fileNameString = file.getAbsolutePath();
-					System.out.println("filename = " + fileNameString);
-					if (fileNameString != null){
-						SavedMap map = SavedMap.loadMap(fileNameString);
-						reset();
-						buildColorTable();
-						started = true;
-						paused = true;
-						stepping = false;
-						reseting = false;
-						stepButton.setVisible(true);
-						pauseButton.setVisible(true);
-						startButton.setVisible(false);
-						stopButton.setVisible(true);
-						resetButton.setVisible(false);
-						for (int r = 0; r < Main.ROWS; r++){
-							for (int c = 0; c < Main.COLUMNS; c++){
-								Main.MACHINE.qtable[r][c] = map.getQtable()[r][c];
-							}
-						}
-					}
-				}
-				Main.PRIMARY_STAGE.requestFocus();
-				Main.POPUP_WINDOW.messageBoxStage.close();
 	}
 	
 	void loadState(){
@@ -736,7 +686,7 @@ public class GameBoardController implements Initializable, ControlledScreen {
 		Main.MACHINE = new AI(goalR, goalC, startR, startC, seedMin, seedMax, alpha, gamma, lambda, lambdaDecay, seedReward, reward, rewardDecay);
 		for (int r = 0; r < Main.ROWS; r++){
 			for (int c = 0; c < Main.COLUMNS; c++){
-				Main.MACHINE.qtable[r][c] = state.getQtable()[r][c];
+				Main.MACHINE.qtable[r][c] = state.getQtable(r,c);
 			}
 		}
 		buildArrows();

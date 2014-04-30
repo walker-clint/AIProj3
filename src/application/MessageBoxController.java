@@ -73,7 +73,7 @@ public class MessageBoxController implements Initializable {
 	
 	@FXML
 	public void noButtonPressed(ActionEvent event){
-		Main.GBC.loadMap();
+		Main.GBC.loadState();
 	}
 	
 	@FXML
@@ -82,7 +82,7 @@ public class MessageBoxController implements Initializable {
 			popupFileNameField.requestFocus();
 			popupFileNameField.setText("Enter File Name");
 		} else {
-			Main.GBC.saveMap(popupFileNameField.getText());
+			Main.GBC.saveState(popupFileNameField.getText());
 		}
 	}
 	

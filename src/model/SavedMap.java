@@ -354,12 +354,12 @@ public class SavedMap implements Serializable {
 		this.stepping = stepping;
 	}
 
-	public Square[][] getQtable() {
-		return qtable;
+	public Square getQtable(int r, int c) {
+		return qtable[r][c];
 	}
 
-	public void setQtable(Square[][] qtable) {
-		this.qtable = qtable;
+	public void setQtable(Square sq, int r, int c) {
+		this.qtable[r][c] = sq;
 	}
 
 	public static long getSerialversionuid() {
