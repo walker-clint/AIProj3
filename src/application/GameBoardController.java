@@ -13,15 +13,10 @@ import java.net.URL;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.LinkedList;
-import java.util.Queue;
 import java.util.Random;
 import java.util.ResourceBundle;
 import java.util.Timer;
 import java.util.TimerTask;
-
-import com.sun.jmx.snmp.Timestamp;
-import com.sun.xml.internal.ws.wsdl.writer.document.StartWithExtensionsType;
-
 import model.AI;
 import model.SavedMap;
 import model.Move;
@@ -64,6 +59,9 @@ public class GameBoardController implements Initializable, ControlledScreen {
 	@FXML	Label				numberOfRunsLabel;
 	@FXML	Label				currentLambdaLabel;
 	@FXML	Label				movesLabel;
+	@FXML	Label				avgMovesLabel;
+	@FXML	Label				percentRandomMovesLabel;
+	@FXML	Label				deltaQLabel;
 	
 	@FXML	TextField			lambdaField;
 	@FXML	TextField			lambdaDecayField;
@@ -95,6 +93,9 @@ public class GameBoardController implements Initializable, ControlledScreen {
 	@FXML	Button				saveMapButton;
 	@FXML	Button				loadMapButton;
 	@FXML	Button				resetButton;
+	@FXML	Button				arrowTypeButton;
+	@FXML	Button				propogationTypeButton;
+	@FXML	Button				lambdaEnabledButton;
 
 	
 	@FXML 	Rectangle			newRectangle;
@@ -107,6 +108,9 @@ public class GameBoardController implements Initializable, ControlledScreen {
 								rewardDecay,
 								alpha,
 								gamma,
+								avgMoves,
+								totalMoves,
+								oldQValue,
 								offsetX				= 20,
 								offsetY				= 30,
 								seedMin,
@@ -118,10 +122,12 @@ public class GameBoardController implements Initializable, ControlledScreen {
 								goalC,
 								R,
 								C,
+								percentRand,
 								counter				= 0,
 								clock				= 0,
 								speed				= 500,
 								speedCounter 		= 0,
+								rewardPaybackNumber	= 100,
 								numberOfMoves		= 0,
 								runs				= 0,
 								numRuns;
@@ -130,7 +136,11 @@ public class GameBoardController implements Initializable, ControlledScreen {
 								started				= false,
 								paused 				= false,
 								stepping 			= false,
-								reseting			= true;
+								reseting			= true,
+								propogationReward	= true,
+								arrowTypeDirection	= true,
+								displayChanged		= false,
+								lambdaEnabled		= true;
 	public	boolean				waiting				= true;
 							
 	private Rectangle[][]		rectangles;
@@ -199,13 +209,14 @@ public class GameBoardController implements Initializable, ControlledScreen {
 				counter = 0;
 				clock = 0;
 				pausePressed(event);
+				startTimerLoop();
 				startLoop();
 			} 
 		}
 	}
 	
 	@FXML
-	void saveMapPressed(ActionEvent event){
+	void saveStatePressed(ActionEvent event){
 		if (fileNameField.getText().equals("") || fileNameField.getText().equals("Enter File Name") || fileNameField.getText().equals("File Saved")){
 			fileNameField.requestFocus();
 			fileNameField.setText("Enter File Name");
@@ -224,7 +235,28 @@ public class GameBoardController implements Initializable, ControlledScreen {
 			System.out.println(e.getMessage());
 			System.out.println("Load map in catch screen name " + Main.SAVE_POPUP_FXML);
 		}
-		
+	}
+	
+	@FXML
+	void saveMapPressed(ActionEvent event){
+		if (fileNameField.getText().equals("") || fileNameField.getText().equals("Enter File Name") || fileNameField.getText().equals("File Saved")){
+			fileNameField.requestFocus();
+			fileNameField.setText("Enter File Name");
+		} else {
+			saveMap(fileNameField.getText());
+			fileNameField.setText("File Saved");
+		}
+	}
+	
+	@FXML
+	void loadStatePressed(ActionEvent event){
+		try {
+		 	Main.POPUP_WINDOW.showMessageBox(Main.PRIMARY_STAGE); 
+		 	System.out.println("Load map in try screen name " + Main.SAVE_POPUP_FXML);
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			System.out.println("Load map in catch screen name " + Main.SAVE_POPUP_FXML);
+		}
 	}
 	
 	@FXML 
@@ -287,6 +319,7 @@ public class GameBoardController implements Initializable, ControlledScreen {
 	@FXML
 	void resetRunsPressed(ActionEvent event){
 		runs = 0;
+		numberOfRunsLabel.setText(runs + "");
 	}
 	
 	@FXML
@@ -368,11 +401,45 @@ public class GameBoardController implements Initializable, ControlledScreen {
 		}
 	}
 	
+	@FXML
+	public void showPropogationPressed(ActionEvent event){
+		if (propogationReward){
+			propogationReward = false;
+			propogationTypeButton.setText("QTable\nPropogation");
+			displayChanged = true;
+		} else {
+			propogationReward = true;
+			propogationTypeButton.setText("Reward\nPropogation");
+			displayChanged = true;
+		}
+	}
+	 
+	@FXML
+	public void showArrorTypePressed(ActionEvent event){
+		if (arrowTypeDirection){
+			arrowTypeDirection = false;
+			arrowTypeButton.setText("Rotation");
+			displayChanged = true;
+		} else {
+			arrowTypeDirection = true;
+			arrowTypeButton.setText("Direction");
+			displayChanged = true;
+		}
+	}
+	
+	@FXML
+	public void lambdaEnabledPressed(ActionEvent event){
+		if (lambdaEnabled){
+			lambdaEnabled = false;
+			lambdaEnabledButton.setText("Disabled");
+		} else {
+			lambdaEnabled = true;
+			lambdaEnabledButton.setText("Enabled");
+		}
+	}
 	
 	//==============================================================================
 	// NON-FXML Methods
-	
-
 	void resetMapColors(){
 		System.out.println("START RESET BOARD COLORS");
 		for (int c = 0; c < Main.COLUMNS; c++){
@@ -394,17 +461,13 @@ public class GameBoardController implements Initializable, ControlledScreen {
 					arrows[r][c].setScaleY(Main.SCALE_ADJUSTMENT_FACTOR * Main.MACHINE.qtable[r][c].getScaleFactor());
 					arrows[r][c].setLayoutX((35 * r) + offsetX); //remove after testing
 					arrows[r][c].setLayoutY((35 * c) + offsetY); //remove after testing
-					
 				}
 			}
 		}
 		//System.out.println("STOP RESET BOARD COLORS");
 	}
 	
-	void saveMap(String fileName){
-		SavedMap map = new SavedMap(lambda, lambdaDecay, reward, rewardDecay, alpha, gamma, seedMin, seedMax, seedReward, startR, startC, R, C, numRuns, numberOfMoves, goalR, goalC, counter, clock, runs, Main.MACHINE.qtable);
-		map.saveMap(map, fileName);
-	}
+
 	
 	void updateBoard(){
 		//X = Double.parseDouble(XField.getText());
@@ -420,12 +483,11 @@ public class GameBoardController implements Initializable, ControlledScreen {
 					//System.out.println("QTable[" + r + "][" + c + "] " + Main.MACHINE.qtable[r][c].toString());
 				} else {
 					//System.out.println("QTable[" + r + "][" + c + "] " + Main.MACHINE.qtable[r][c].toString());
-					
-					arrows[r][c].setRotate(Main.MACHINE.qtable[r][c].getDirection());
+					Main.MACHINE.qtable[r][c].updateSquareDisplay();
 					arrows[r][c].setScaleX(Main.SCALE_ADJUSTMENT_FACTOR * Main.MACHINE.qtable[r][c].getScaleFactor());
 					arrows[r][c].setScaleY(Main.SCALE_ADJUSTMENT_FACTOR * Main.MACHINE.qtable[r][c].getScaleFactor());
-					arrows[r][c].setLayoutX((35 * r) + offsetX); //remove after testing
-					arrows[r][c].setLayoutY((35 * c) + offsetY); //remove after testing
+					//arrows[r][c].setLayoutX((35 * r) + offsetX); //remove after testing
+					//arrows[r][c].setLayoutY((35 * c) + offsetY); //remove after testing
 					
 				}
 			}
@@ -435,7 +497,6 @@ public class GameBoardController implements Initializable, ControlledScreen {
 	
 	void buildRectangles(){
 		rectangles = new Rectangle[Main.ROWS][Main.COLUMNS];
-		
 		for (int c = 0; c < Main.COLUMNS; c++){
 			for (int r = 0; r < Main.ROWS; r++){
 				rectangles[r][c] = RectangleBuilder.create()
@@ -503,7 +564,6 @@ public class GameBoardController implements Initializable, ControlledScreen {
 				}
 			}
 		}
-		
 	}
 	
 	void deleteArrows(){
@@ -566,12 +626,54 @@ public class GameBoardController implements Initializable, ControlledScreen {
 		movesLabel.setText(numberOfMoves + "");
 	}
 	
+	void saveMap(String fileName){
+		SavedMap map = new SavedMap(goalR, goalC, Main.MACHINE.qtable);
+		map.saveMap(map, fileName);
+	}
+	
+	void saveState(String fileName){
+		SavedMap state = new SavedMap(lambda, lambdaDecay, reward, rewardDecay, alpha, gamma, seedMin, seedMax, seedReward, startR, startC, R, C, numRuns, numberOfMoves, goalR, goalC, counter, clock, runs, Main.MACHINE.qtable);
+		state.saveMap(state, fileName);
+	}
 	
 	void loadMap(){
 		//start file load process
+				//display file name in message log
+				//show send message button
+				String fileNameString = "";
+				File file = fileChooser.showOpenDialog(Main.PRIMARY_STAGE);
+				if (file != null) {
+					//openFile(file);
+					fileNameString = file.getAbsolutePath();
+					System.out.println("filename = " + fileNameString);
+					if (fileNameString != null){
+						SavedMap map = SavedMap.loadMap(fileNameString);
+						reset();
+						buildColorTable();
+						started = true;
+						paused = true;
+						stepping = false;
+						reseting = false;
+						stepButton.setVisible(true);
+						pauseButton.setVisible(true);
+						startButton.setVisible(false);
+						stopButton.setVisible(true);
+						resetButton.setVisible(false);
+						for (int r = 0; r < Main.ROWS; r++){
+							for (int c = 0; c < Main.COLUMNS; c++){
+								Main.MACHINE.qtable[r][c] = map.getQtable()[r][c];
+							}
+						}
+					}
+				}
+				Main.PRIMARY_STAGE.requestFocus();
+				Main.POPUP_WINDOW.messageBoxStage.close();
+	}
+	
+	void loadState(){
+		//start file load process
 		//display file name in message log
 		//show send message button
-		
 		String fileNameString = "";
 		File file = fileChooser.showOpenDialog(Main.PRIMARY_STAGE);
 		if (file != null) {
@@ -579,7 +681,7 @@ public class GameBoardController implements Initializable, ControlledScreen {
 			fileNameString = file.getAbsolutePath();
 			System.out.println("filename = " + fileNameString);
 			if (fileNameString != null){
-				SavedMap map = SavedMap.loadMap(fileNameString);
+				SavedMap state = SavedMap.loadMap(fileNameString);
 				reset();
 				buildColorTable();
 				started = true;
@@ -591,33 +693,34 @@ public class GameBoardController implements Initializable, ControlledScreen {
 				startButton.setVisible(false);
 				stopButton.setVisible(true);
 				resetButton.setVisible(false);
-				initLoadedMap(map);
+				initLoadedState(state);
 			}
 		}
 		Main.PRIMARY_STAGE.requestFocus();
 		Main.POPUP_WINDOW.messageBoxStage.close();
 	}
-	void initLoadedMap(SavedMap map){
+	
+	void initLoadedState(SavedMap state){
 		paused = true;
-		goalR = map.getGoalX();
-		goalC = map.getGoalY();
-		seedMin = map.getSeedMin();
-		seedMax = map.getSeedMax();
-		alpha = map.getAlpha();
-		gamma = map.getGamma();
-		lambda = map.getLambda();
-		lambdaDecay = map.getLambdaDecay();
-		seedReward = map.getSeedReward();
-		reward = map.getReward();
-		counter = map.getCounter();
-		clock = map.getClock();
-		startR = map.getStartX();
-		startC = map.getStartY();
-		runs = map.getRuns();
-		numRuns = map.getNumRuns();
-		R = map.getR();
-		C = map.getC();
-		numberOfMoves = map.getNumMoves();
+		goalR = state.getGoalX();
+		goalC = state.getGoalY();
+		seedMin = state.getSeedMin();
+		seedMax = state.getSeedMax();
+		alpha = state.getAlpha();
+		gamma = state.getGamma();
+		lambda = state.getLambda();
+		lambdaDecay = state.getLambdaDecay();
+		seedReward = state.getSeedReward();
+		reward = state.getReward();
+		counter = state.getCounter();
+		clock = state.getClock();
+		startR = state.getStartX();
+		startC = state.getStartY();
+		runs = state.getRuns();
+		numRuns = state.getNumRuns();
+		R = state.getR();
+		C = state.getC();
+		numberOfMoves = state.getNumMoves();
 		goalRField.setText(goalR + "");
 		goalCField.setText(goalC + "");
 		alphaField.setText(alpha + "");
@@ -633,7 +736,7 @@ public class GameBoardController implements Initializable, ControlledScreen {
 		Main.MACHINE = new AI(goalR, goalC, startR, startC, seedMin, seedMax, alpha, gamma, lambda, lambdaDecay, seedReward, reward, rewardDecay);
 		for (int r = 0; r < Main.ROWS; r++){
 			for (int c = 0; c < Main.COLUMNS; c++){
-				Main.MACHINE.qtable[r][c] = map.getQtable()[r][c];
+				Main.MACHINE.qtable[r][c] = state.getQtable()[r][c];
 			}
 		}
 		buildArrows();
@@ -641,9 +744,7 @@ public class GameBoardController implements Initializable, ControlledScreen {
 		pauseButton.requestFocus();
 		startLoop();
 	}
-	
 	boolean getInput(){
-		
 		input = seedMinField.getText();
 		try {
 			seedMin = Double.parseDouble(input);
@@ -658,7 +759,6 @@ public class GameBoardController implements Initializable, ControlledScreen {
 			seedMaxField.requestFocus();
 			return false;
 		}
-		
 		//get lambda
 		input = lambdaField.getText();
 		try {
@@ -775,14 +875,11 @@ public class GameBoardController implements Initializable, ControlledScreen {
 		//System.out.println("the number of blocks = " + numBlocks);
 		for (int i = 0; i < numBlocks; i++){
 			Random num = new Random();
-			
 			blockX = num.nextInt(Main.ROWS);
 			blockY = num.nextInt(Main.COLUMNS);
-			
 			if(Main.MACHINE.qtable[blockX][blockY].isGoal() || Main.MACHINE.qtable[blockX][blockY].isWall()){
 				--i;
 			} else {
-				
 				Main.MACHINE.qtable[blockX][blockY].setWall(true);
 				Main.MACHINE.qtable[blockX][blockY].setColor("DARKGREY");
 				rectangles[blockX][blockY].setFill(colorTable.get(Color.DARKGREY));
@@ -798,15 +895,16 @@ public class GameBoardController implements Initializable, ControlledScreen {
 			startR = num.nextInt(Main.ROWS);
 			startC = num.nextInt(Main.COLUMNS);
 			System.out.println("startR: " + startR + "  startC: " + startC);
-			if(!Main.MACHINE.qtable[startR][startC].isGoal() || !Main.MACHINE.qtable[startR][startC].isWall()){
-				Main.MACHINE.qtable[startR][startC].setColor("CORNFLOWERBLUE");
-				rectangles[startR][startC].setFill(colorTable.get(Color.CORNFLOWERBLUE));
+			if(Main.MACHINE.qtable[startR][startC].isGoal() || Main.MACHINE.qtable[startR][startC].isWall()){
+				System.out.println("Start Move: [" + startR + "][" + startC + "] is not a valid start position");
+			} else {
+				//Main.MACHINE.qtable[startR][startC].setColor("CORNFLOWERBLUE");
+				//rectangles[startR][startC].setFill(colorTable.get(Color.CORNFLOWERBLUE));
 				R = startR;
 				C = startC;
 				settingStartPos = false;
 			}
-		}
-		
+		}	
 	}
 	
 	private void buildColorTable(){
@@ -828,7 +926,6 @@ public class GameBoardController implements Initializable, ControlledScreen {
 		System.out.println("BLUEVIOLET= " + "BLUEVIOLET" + " from dictionary: " + colorTable.get("BLUEVIOLET"));
 		System.out.println("DARKSLATEBLUE= " + "DARKSLATEBLUE" + " from dictionary: " + colorTable.get("DARKSLATEBLUE"));
 		System.out.println("DARKCYAN= " + "DARKCYAN" + " from dictionary: " + colorTable.get("DARKCYAN"));
-		
 	}
 	
 	public void errorStop(){
@@ -877,6 +974,32 @@ public class GameBoardController implements Initializable, ControlledScreen {
 	public void setAlpha(double alpha) {
 		this.alpha = alpha;
 	}
+	
+	
+
+	public boolean isLambdaEnabled() {
+		return lambdaEnabled;
+	}
+
+	public void setLambdaEnabled(boolean lambdaEnabled) {
+		this.lambdaEnabled = lambdaEnabled;
+	}
+
+	public boolean isPropogationReward() {
+		return propogationReward;
+	}
+
+	public void setPropogation(boolean propogationReward) {
+		this.propogationReward = propogationReward;
+	}
+
+	public boolean isArrowTypeDirection() {
+		return arrowTypeDirection;
+	}
+
+	public void setShowArrowType(boolean arrowTypeDirection) {
+		this.arrowTypeDirection = arrowTypeDirection;
+	}
 
 	public double getGamma() {
 		return gamma;
@@ -912,31 +1035,36 @@ public class GameBoardController implements Initializable, ControlledScreen {
 			public void run() {
 				Platform.runLater(new Runnable() {
 					public void run() {
-						counter++;
 						speedCounter++;
-						if (counter == 1000){
-							counter = 0;
-							clock++;
-							runTimerLabel.setText("" + clock);
-						}
 						if ((speedCounter == speed && !paused) || stepping){ // one second clock
 							//System.out.println("pre-move location: [" + R + "][" + C + "]");
 							int 	nextR, nextC;
 						
 							Main.MACHINE.qtable[R][C].setColor("DARKSLATEBLUE");
 							rectangles[R][C].setFill(Color.DARKSLATEBLUE);
+							oldQValue = Main.MACHINE.qtable[R][C].getWeight();
+							currentQ0Label.setText(oldQValue + "");
+							currentQ1Label.setText(oldQValue + "");
+							currentRewardLabel.setText(Main.MACHINE.qtable[R][C].getReward() + "");
 							Main.MACHINE.makeMove(R, C);
+							
 							nextR = Main.MACHINE.getNextR();
 							nextC = Main.MACHINE.getNextC();
+							nextStateQLabel.setText(Main.MACHINE.qtable[nextR][nextC].getWeight() + "");
+							Main.MACHINE.qtable[R][C].updateWeight(nextR, nextC);
+							resultQCompleteLabel.setText(Main.MACHINE.qtable[R][C].getWeight() + "");
+							deltaQLabel.setText(oldQValue - Main.MACHINE.qtable[R][C].getWeight() + "");
 							//System.out.println("Goal is found= " + Main.MACHINE.isFoundGoal());
 							if(!currentLambdaLabel.isVisible())	{
 								currentLambdaLabel.setVisible(true);
 							}
 							lambdaField.setText(Main.MACHINE.getLambda() + "");
-							/*if(!Main.MACHINE.isRandom()){
-								Main.MACHINE.qtable[R][C].updateWeight(nextR, nextC);
-								Main.MACHINE.qtable[R][C].updateSquareDisplay();
-							}*/
+							if(Main.MACHINE.isRandom()){
+								//Main.MACHINE.qtable[R][C].updateWeight(nextR, nextC);
+								//Main.MACHINE.qtable[R][C].updateSquareDisplay();
+								percentRand++;
+							}
+							Main.MACHINE.qtable[R][C].updateSquareDisplay();
 							R = nextR;
 							C = nextC;
 							//System.out.println("move location: [" + R + "][" + C + "]");
@@ -947,16 +1075,25 @@ public class GameBoardController implements Initializable, ControlledScreen {
 							moves.add(new Move(R,C));
 							numberOfMoves++;
 							movesLabel.setText(numberOfMoves + "");
-							
+							if (displayChanged){
+								updateBoard();
+								displayChanged = false;
+							}
 							if(Main.MACHINE.isFoundGoal() || (R == goalR && C == goalC)){
 								runs++;
+								totalMoves += numberOfMoves;
+								avgMoves = totalMoves/runs;
+								avgMovesLabel.setText(avgMoves + "");
+								System.out.println( "100/totMoves: " + (100/totalMoves) + " total moves: " + totalMoves + " randomMoves: " + percentRand + " percentRand * (100/totMoves) :" + (100/totalMoves)*percentRand);
+								
+								percentRandomMovesLabel.setText((int) ((100/totalMoves)*percentRand) + "%");
 								numberOfMoves = 0;
 								numberOfRunsLabel.setText("" + runs);
 								//unwind the reward back through the linked list or queue
 								if (moves.size() > 2){
 									int endUnwind;
-									if (moves.size() > 102){
-										endUnwind = moves.size() - 2 - 100;
+									if (moves.size() > rewardPaybackNumber + 2){
+										endUnwind = moves.size() - 2 - rewardPaybackNumber;
 									} else {
 										endUnwind = moves.size() - 2;
 									}
@@ -965,12 +1102,10 @@ public class GameBoardController implements Initializable, ControlledScreen {
 										int lastR = moves.get(i+1).getR();
 										int locC = moves.get(i).getC();
 										int lastC = moves.get(i+1).getC();
-										rectangles[locR][locC].setFill(Color.PINK);
-										rectangles[lastR][lastC].setFill(Color.BROWN);
 										System.out.print("Unwind i= " + i + " ::\n" + moves.get(i).toString() + "  start reward: " + Main.MACHINE.qtable[locR][locC].getReward() 
 												+ "\n\t Start Weight= " + Main.MACHINE.qtable[locR][locC].getWeight() + "\n" + moves.get(i+1).toString());
 										Main.MACHINE.qtable[locR][locC].updateReward(lastR, lastC);
-										Main.MACHINE.qtable[locR][locC].updateWeight(lastR, lastC);
+										//Main.MACHINE.qtable[locR][locC].updateWeight(lastR, lastC);
 										Main.MACHINE.qtable[locR][locC].updateSquareDisplay();
 										System.out.print("  rewardvalue: " + Main.MACHINE.qtable[locR][locC].getReward() 
 												+ "  startReward after decay " + Main.MACHINE.qtable[locR][locC].getReward() 
@@ -980,7 +1115,53 @@ public class GameBoardController implements Initializable, ControlledScreen {
 								}
 								resetMapColors();
 								//choose new starting point
-								setStartPos();
+								if(random){
+									setStartPos();
+								} else {
+									int fixedR = -1, fixedC = -1;
+									boolean settingStartPos = true, sR = false, sC = false;
+									while (settingStartPos){
+										input = startRField.getText();
+										try {
+											fixedR = Integer.parseInt(input);
+											sR = true;
+											if (fixedR < 0 || fixedR >= Main.ROWS){
+												startRField.requestFocus();
+												sR = false;
+											}
+											
+										} catch (Exception e) {
+											startRField.requestFocus();
+											sR = false;
+										}
+										input = startCField.getText();
+										try {
+											fixedC = Integer.parseInt(input);
+											sC = true;
+											if (fixedC < 0 || fixedC >= Main.COLUMNS){
+												startCField.requestFocus();
+												sC = false;
+											}
+										} catch (Exception e) {
+											startCField.requestFocus();
+											sC = false;
+										}
+										if (sR && sC){
+											settingStartPos = false;
+											R = fixedR;
+											C = fixedC;
+										} else {
+											setStartPos();
+											if (sR){
+												R = fixedR;
+											}
+											if (sC){
+												C = fixedC;
+											}
+											settingStartPos = false;
+										}
+									}
+								}
 								moves.add(new Move(startR,startC));
 								System.out.println("New Start Pos= [" + startR + "][" + startC + "]" );
 								
@@ -992,6 +1173,7 @@ public class GameBoardController implements Initializable, ControlledScreen {
 								
 								Main.MACHINE.setFoundGoal(false);
 								updateBoard();
+								
 								if(runs > numRuns){
 									errorStop();
 								}
@@ -1007,5 +1189,24 @@ public class GameBoardController implements Initializable, ControlledScreen {
 		}, 0, 1);
 	}
 	
-
+	
+	void startTimerLoop(){
+		timer = new Timer();
+		counter = 0;
+		
+		timer.schedule(new TimerTask() {
+			public void run() {
+				Platform.runLater(new Runnable() {
+					public void run() {
+						counter++;
+						if (counter == 1000){
+							counter = 0;
+							clock++;
+							runTimerLabel.setText("" + clock);
+						}
+					}
+				});
+			}
+		}, 0, 1);
+	}
 }

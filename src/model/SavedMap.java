@@ -59,6 +59,12 @@ public class SavedMap implements Serializable {
 	private Square[][]		qtable;
 	
 	
+	public SavedMap(int _goalX, int _goalY, Square[][] _qtable) {
+		goalX = _goalX;
+		goalY = _goalY;
+		qtable = _qtable;	
+	}
+	
 	public SavedMap(double _lambda, double _lambdaDecay, double _reward, double _rewardDecay, 
 			double _alpha, double _gamma, double _seedMin, 
 			double _seedMax, double _seedReward, int _startX, int _startY, int _R, Integer _C, int _numRuns, int _numMoves, int _goalX, int _goalY,
