@@ -129,16 +129,16 @@
             <Label id="startRLabel" font="$x7" layoutX="898.0" layoutY="28.0" prefWidth="33.0" text="Row:" />
             <Label id="startCLabel" font="$x2" layoutX="881.0" layoutY="47.0" text="Column:" />
             <Label font="$x2" layoutX="898.0" layoutY="6.0" text="Goal Position" />
-            <Label layoutX="103.0" layoutY="67.0" prefWidth="883.0" text="Q(s,a)         ←      Q(s,a)                 +  α    (      R(s)                   +  γ          Q(s',a' )             -            Q(s,a)          )">
+            <Label layoutX="103.0" layoutY="67.0" prefWidth="883.0" text="Q(s,a)         ←      Q(s,a)              +  α    (      R(s)                 +  γ          Q(s',a' )           -            Q(s,a)        )">
               <font>
-                <Font name="System Bold" size="18.0" />
+                <Font name="Arial Bold" size="18.0" />
               </font>
             </Label>
-            <Label fx:id="resultQCompleteLabel" font="$x8" labelFor="$resultQCompleteLabel" layoutX="51.0" layoutY="100.0" prefWidth="145.0" text="0" textOverrun="CENTER_ELLIPSIS" />
-            <Label fx:id="currentQ0Label" font="$x8" layoutX="222.0" layoutY="100.0" prefWidth="145.0" text="0" textOverrun="CENTER_ELLIPSIS" />
-            <Label fx:id="currentRewardLabel" font="$x8" layoutX="432.0" layoutY="101.0" prefWidth="145.0" text="0" textOverrun="CENTER_ELLIPSIS" />
-            <Label fx:id="nextStateQLabel" font="$x8" layoutX="639.0" layoutY="101.0" prefWidth="145.0" text="0" textOverrun="CENTER_ELLIPSIS" />
-            <Label fx:id="currentQ1Label" font="$x8" layoutX="800.0" layoutY="101.0" prefWidth="145.0" text="0" textOverrun="CENTER_ELLIPSIS" />
+            <Label fx:id="resultQCompleteLabel" font="$x8" labelFor="$resultQCompleteLabel" layoutX="51.0" layoutY="101.0" prefWidth="145.0" text="0" textOverrun="CENTER_ELLIPSIS" />
+            <Label fx:id="currentQ0Label" font="$x8" layoutX="222.0" layoutY="101.0" prefWidth="145.0" text="0" textOverrun="CENTER_ELLIPSIS" />
+            <Label fx:id="currentRewardLabel" font="$x8" layoutX="433.0" layoutY="102.0" prefWidth="145.0" text="0" textOverrun="CENTER_ELLIPSIS" />
+            <Label fx:id="nextStateQLabel" font="$x8" layoutX="640.0" layoutY="102.0" prefWidth="145.0" text="0" textOverrun="CENTER_ELLIPSIS" />
+            <Label fx:id="currentQ1Label" font="$x8" layoutX="801.0" layoutY="102.0" prefWidth="145.0" text="0" textOverrun="CENTER_ELLIPSIS" />
             <Label layoutX="202.0" layoutY="91.0" text="←">
               <font>
                 <Font size="20.0" fx:id="x4" />
