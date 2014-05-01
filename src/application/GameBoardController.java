@@ -1043,6 +1043,11 @@ public class GameBoardController implements Initializable, ControlledScreen {
 		Main.PRIMARY_STAGE.setY(10);
 	}
 	
+	@FXML
+	public void onCloseWindow(ActionEvent event) {
+		Platform.exit();
+	}
+	
 	
 	void startLoop(){
 		timer = new Timer();

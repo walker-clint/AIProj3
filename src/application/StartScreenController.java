@@ -10,6 +10,7 @@ package application;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -35,6 +36,7 @@ public class StartScreenController implements Initializable, ControlledScreen {
 	@FXML
 	public void exit(ActionEvent event){
 		Main.PRIMARY_STAGE.close();
+		Platform.exit();
 	}
 	
 	//==============================================================================
