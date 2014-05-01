@@ -20,16 +20,16 @@
       <left>
         <Pane prefHeight="-1.0" prefWidth="100.0" BorderPane.alignment="TOP_LEFT">
           <children>
-            <Button fx:id="speedButton" layoutX="8.0" layoutY="37.0" mnemonicParsing="false" onAction="#setSpeed" prefWidth="83.0" text="Normal" visible="true">
+            <Button fx:id="speedButton" layoutX="8.0" layoutY="91.0" mnemonicParsing="false" onAction="#setSpeed" prefWidth="83.0" text="Normal" visible="true">
               <font>
                 <Font name="Arial Bold" size="13.0" fx:id="x1" />
               </font>
             </Button>
-            <Label font="$x1" layoutX="15.0" layoutY="70.0" text="Run Time:" />
-            <Label id="runTimer" fx:id="runTimerLabel" font="$x1" layoutX="20.0" layoutY="85.0" prefWidth="50.0" text="0" />
-            <Label layoutX="16.0" layoutY="21.0" text="Set Speed" />
-            <Label font="$x1" layoutX="15.0" layoutY="100.0" text="Runs" />
-            <Label fx:id="numberOfRunsLabel" font="$x1" layoutX="20.0" layoutY="115.0" prefWidth="53.0" text="0" />
+            <Label font="$x1" layoutX="15.0" layoutY="124.0" text="Run Time:" />
+            <Label id="runTimer" fx:id="runTimerLabel" font="$x1" layoutX="20.0" layoutY="139.0" prefWidth="50.0" text="0" />
+            <Label layoutX="16.0" layoutY="75.0" text="Set Speed" />
+            <Label font="$x1" layoutX="15.0" layoutY="154.0" text="Runs" />
+            <Label fx:id="numberOfRunsLabel" font="$x1" layoutX="20.0" layoutY="169.0" prefWidth="53.0" text="0" />
             <Button layoutX="15.0" layoutY="287.0" mnemonicParsing="false" onAction="#buildRects" text="rectangles" visible="false" />
             <Button layoutX="25.0" layoutY="467.0" mnemonicParsing="false" onAction="#updateArrowsPressed" text="update" visible="false" />
             <TextField fx:id="rotateField" layoutX="25.0" layoutY="381.0" prefWidth="53.0" text="0" visible="false" />
@@ -50,18 +50,23 @@
                 <Font name="Arial" size="12.0" fx:id="x8" />
               </font>
             </Label>
-            <Label font="$x1" layoutX="15.0" layoutY="130.0" text="Moves" />
-            <Label id="numberOfRunsLabel" fx:id="movesLabel" font="$x1" layoutX="20.0" layoutY="145.0" prefWidth="53.0" text="0" />
-            <Label font="$x1" layoutX="15.0" layoutY="160.0" text="Avg Moves" />
-            <Label id="numberOfRunsLabel" fx:id="avgMovesLabel" font="$x1" layoutX="20.0" layoutY="175.0" prefWidth="53.0" text="0" />
-            <Label font="$x1" layoutX="15.0" layoutY="190.0" text="\% Random" />
-            <Label id="numberOfRunsLabel" fx:id="percentRandomMovesLabel" font="$x1" layoutX="20.0" layoutY="205.0" prefWidth="53.0" text="0" />
-            <Button id="propogationType" fx:id="propogationTypeButton" layoutX="5.0" layoutY="231.0" mnemonicParsing="false" onAction="#showPropogationPressed" prefWidth="87.00007792968245" text="Reward&#10;Propogation" textAlignment="CENTER">
+            <Label font="$x1" layoutX="15.0" layoutY="184.0" text="Moves" />
+            <Label id="numberOfRunsLabel" fx:id="movesLabel" font="$x1" layoutX="20.0" layoutY="199.0" prefWidth="53.0" text="0" />
+            <Label font="$x1" layoutX="15.0" layoutY="214.0" text="Avg Moves" />
+            <Label id="numberOfRunsLabel" fx:id="avgMovesLabel" font="$x1" layoutX="20.0" layoutY="229.0" prefWidth="53.0" text="0" />
+            <Label font="$x1" layoutX="15.0" layoutY="244.0" text="\% Random" />
+            <Label id="numberOfRunsLabel" fx:id="percentRandomMovesLabel" font="$x1" layoutX="20.0" layoutY="259.0" prefWidth="53.0" text="0" />
+            <Button id="propogationType" fx:id="propogationTypeButton" layoutX="5.0" layoutY="285.0" mnemonicParsing="false" onAction="#showPropogationPressed" prefWidth="87.00007792968245" text="Reward&#10;Propogation" textAlignment="CENTER">
               <font>
                 <Font name="Arial Bold" size="10.0" fx:id="x9" />
               </font>
             </Button>
-            <Button id="arrowType" fx:id="arrowTypeButton" font="$x9" layoutX="5.0" layoutY="263.0" mnemonicParsing="false" onAction="#showArrorTypePressed" prefWidth="87.00009999999747" text="Direction" textAlignment="CENTER" />
+            <Button id="arrowType" fx:id="arrowTypeButton" font="$x9" layoutX="5.0" layoutY="317.0" mnemonicParsing="false" onAction="#showArrorTypePressed" prefWidth="87.00009999999747" text="Direction" textAlignment="CENTER" />
+            <Button fx:id="AILearningEnabledButton" layoutX="6.0" layoutY="23.0" mnemonicParsing="false" onAction="#aILearningEnabledPressed" prefHeight="30.9609375" prefWidth="87.00009155273438" text="AI Learning&#10;Enabled" textAlignment="CENTER">
+              <font>
+                <Font name="Arial Bold" size="12.0" fx:id="x7" />
+              </font>
+            </Button>
           </children>
         </Pane>
       </left>
@@ -86,11 +91,7 @@
               </font>
             </Label>
             <Label font="$x6" layoutX="106.0" layoutY="108.0" text="Times" />
-            <Button layoutX="87.0" layoutY="132.0" mnemonicParsing="false" onAction="#resetRunsPressed" text="Reset Runs">
-              <font>
-                <Font name="Arial Bold" size="12.0" fx:id="x7" />
-              </font>
-            </Button>
+            <Button font="$x7" layoutX="87.0" layoutY="132.0" mnemonicParsing="false" onAction="#resetRunsPressed" text="Reset Runs" />
             <Label font="$x6" layoutX="15.0" layoutY="161.0" text="Start Position:" />
             <Button fx:id="random_FixedStartButton" font="$x1" layoutX="98.0" layoutY="180.0" minHeight="15.960929052736901" mnemonicParsing="false" onAction="#setRandom" prefHeight="18.7988196777369" prefWidth="76.0" text="Random" />
             <TextField id="startXField" fx:id="startRField" layoutX="130.0" layoutY="204.0" prefWidth="42.0" visible="false" />
