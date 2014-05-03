@@ -172,6 +172,18 @@ public class Square implements Serializable {
 		this.moveIsGoal = moveIsGoal;
 	}
 	
+	public boolean isNoValidMoves() {
+		return noValidMoves;
+	}
+
+	public void setNoValidMoves(boolean noValidMoves) {
+		this.noValidMoves = noValidMoves;
+	}
+
+	
+	
+	
+	
 	//==============================================================================
 	// methods
 
@@ -185,24 +197,24 @@ public class Square implements Serializable {
 	}
 	
 	public void updateWeight(int nextR, int nextC){
-		System.out.println("update weight in location [" + r +  "][" + c + "] current Weight= " + weight);
+		//System.out.println("update weight in location [" + r +  "][" + c + "] current Weight= " + weight);
 		double alpha = Main.GBC.getAlpha();
 		double gamma = Main.GBC.getGamma();
 		double oldWeight = weight;
 		double stepOne = (gamma * Main.MACHINE.qtable[nextR][nextC].getWeight() );
-		System.out.println("stepone value: " + stepOne);
+		//System.out.println("stepone value: " + stepOne);
 		double stepTwo =  stepOne - weight;
-		System.out.println("steptwo value: " + stepTwo);
+		//System.out.println("steptwo value: " + stepTwo);
 		double stepThree = reward + stepTwo;
 		double stepFour = alpha * stepThree;
 		double stepFive = weight + stepFour;
 		weight = stepFive;
-		System.out.println(weight + " = (" + oldWeight + " + " + alpha + "( " + reward + " + " + gamma + "*" + Main.MACHINE.qtable[nextR][nextC].getWeight() + " - " + weight + ")"  );
-		System.out.println(weight + " = (" + oldWeight + " + " + alpha + "( " + reward + " + " + stepOne + " - " + weight + ")"  );
-		System.out.println(weight + " = (" + oldWeight + " + " + alpha + "( " + reward + " + " + stepTwo + ")"  );
-		System.out.println(weight + " = (" + oldWeight + " + " + alpha + "( " + stepThree + ")"  );
-		System.out.println(weight + " = (" + oldWeight + " + " + stepFour + ")"  );
-		System.out.println("new Weight value: " + weight);
+		//System.out.println(weight + " = (" + oldWeight + " + " + alpha + "( " + reward + " + " + gamma + "*" + Main.MACHINE.qtable[nextR][nextC].getWeight() + " - " + weight + ")"  );
+		//System.out.println(weight + " = (" + oldWeight + " + " + alpha + "( " + reward + " + " + stepOne + " - " + weight + ")"  );
+		//System.out.println(weight + " = (" + oldWeight + " + " + alpha + "( " + reward + " + " + stepTwo + ")"  );
+		//System.out.println(weight + " = (" + oldWeight + " + " + alpha + "( " + stepThree + ")"  );
+		//System.out.println(weight + " = (" + oldWeight + " + " + stepFour + ")"  );
+		//System.out.println("new Weight value: " + weight);
 		if (weight < 0){
 			double stopme = 1 + weight;
 			stopme++;
@@ -227,7 +239,7 @@ public class Square implements Serializable {
 		}
 		
 		setRotation(Math.atan2(rayX, rayY));
-		System.out.println ("RayX: " + rayX + " rayY: " + rayY + " rotation radians: " + rotation);
+		//System.out.println ("RayX: " + rayX + " rayY: " + rayY + " rotation radians: " + rotation);
 		rotation = rotation * (180.0 / Math.PI);
 		setDirection();
 		if (Main.GBC.isArrowTypeDirection()){
@@ -235,41 +247,58 @@ public class Square implements Serializable {
 		} else {
 			Main.GBC.arrows[r][c].setRotate(rotation);
 		}
-		System.out.println("Update Display: [" + r + "][" + c + "] dir:" + direction + " mag: " + magnitude + "  Rotation: " + rotation);
+		System.out.println("Update Display: [" + r + "][" + c + "] dir:" + direction + " mag: " + magnitude + "  Rotation: " + rotation + " move is goal: " + moveIsGoal);
+		
 	}
 	
-	public void setDirection(){
+	public int setDirection(){
 		double lV = 0, rV = 0, uV = 0, dV = 0, val, dir;
 		if(leftValid){
 			lV = Main.MACHINE.qtable[r-1][c].getWeight();
 			if(Main.MACHINE.qtable[r-1][c].isGoal()){
-				lV = 1000000;
+				lV = 10000000;
 				moveIsGoal = true;
 				setRotation(270);
+				direction = 270;
+				moveR = r-1;
+				moveC = c;
+				return 1;
 			}
 		}
 		if(rightValid){
 			rV = Main.MACHINE.qtable[r+1][c].getWeight();
 			if(Main.MACHINE.qtable[r+1][c].isGoal()){
-				rV = 1000000;
+				rV = 10000000;
 				moveIsGoal = true;
 				setRotation(90);
+				direction = 90;
+				moveR = r+1;
+				moveC = c;
+				return 1;
 			}
 		}
 		if(upValid){
 			uV = Main.MACHINE.qtable[r][c-1].getWeight();
 			if(Main.MACHINE.qtable[r][c-1].isGoal()){
-				uV = 1000000;
+				uV = 10000000;
 				moveIsGoal = true;
 				setRotation(0);
+				direction = 0;
+				moveR = r;
+				moveC = c-1;
+				return 1;
 			}
 		}
 		if(downValid){
 			dV = Main.MACHINE.qtable[r][c+1].getWeight();
 			if(Main.MACHINE.qtable[r][c+1].isGoal()){
-				dV = 1000000;
+				dV = 10000000;
 				moveIsGoal = true;
 				setRotation(180);
+				direction = 180;
+				moveR = r;
+				moveC = c+1;
+				return 1;
 			}
 		}
 		if (rV > lV){
@@ -306,6 +335,7 @@ public class Square implements Serializable {
 			moveR = r;
 			moveC = c+1;
 		}
+		return 0;
 	}
 	
 	public void setMoves(){

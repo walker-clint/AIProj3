@@ -67,6 +67,7 @@
                 <Font name="Arial Bold" size="12.0" fx:id="x7" />
               </font>
             </Button>
+            <Button fx:id="runTestSeriesButton" font="$x7" layoutX="10.0" layoutY="342.0" mnemonicParsing="false" onAction="#runTestSeriesPressed" text="Run Test &#10;Series" />
           </children>
         </Pane>
       </left>
@@ -103,6 +104,8 @@
                 <Font name="Arial Bold" size="16.0" fx:id="x5" />
               </font>
             </Button>
+            <Label font="$x6" layoutX="15.0" layoutY="208.0" text="Percentage &#10;of Walls:" textAlignment="RIGHT" />
+            <TextField id="goalYField" fx:id="percentWallsField" layoutX="103.0" layoutY="213.0" prefWidth="33.0" text="10" />
           </children>
         </Pane>
       </right>

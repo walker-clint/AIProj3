@@ -82,6 +82,7 @@ public class GameBoardController implements Initializable, ControlledScreen {
 	@FXML	TextField			seedMaxField;
 	@FXML	TextField			seedMinField;
 	@FXML	TextField			numRunsField;
+	@FXML	TextField			percentWallsField;
 	
 		
 	@FXML	Button				pauseButton;
@@ -98,6 +99,7 @@ public class GameBoardController implements Initializable, ControlledScreen {
 	@FXML	Button				propogationTypeButton;
 	@FXML	Button				lambdaEnabledButton;
 	@FXML	Button				AILearningEnabledButton;
+	@FXML	Button				runTestSeriesButton;
 	
 	@FXML 	Rectangle			newRectangle;
 	
@@ -110,6 +112,7 @@ public class GameBoardController implements Initializable, ControlledScreen {
 								rewardDecay,
 								alpha,
 								gamma,
+								percentWalls,
 								avgMoves,
 								totalMoves,
 								oldQValue,
@@ -125,6 +128,7 @@ public class GameBoardController implements Initializable, ControlledScreen {
 								R,
 								C,
 								percentRand,
+								testRunStart		= 0,
 								counter				= 0,
 								clock				= 0,
 								speed				= 500,
@@ -143,7 +147,8 @@ public class GameBoardController implements Initializable, ControlledScreen {
 								arrowTypeDirection	= true,
 								displayChanged		= false,
 								lambdaEnabled		= true,
-								learning			= true;
+								learning			= true,
+								runTestSeries		= false;
 	public	boolean				waiting				= true;
 							
 	private Rectangle[][]		rectangles;
@@ -153,7 +158,7 @@ public class GameBoardController implements Initializable, ControlledScreen {
 	public  Scene				popupScene;
 	Dictionary<String, Color> 	colorTable 			= new Hashtable<String, Color>();
 	private LinkedList<Move> 	moves				= new LinkedList<Move>();
-	
+	private LinkedList<Move> 	testMoves			= new LinkedList<Move>();
 	//==============================================================================
 	// FXML Methods
 	
@@ -272,6 +277,8 @@ public class GameBoardController implements Initializable, ControlledScreen {
 		updateBoard();
 		event.consume();
 	}
+	
+	
 	
 	@FXML
 	void setSpeed(ActionEvent event){
@@ -454,6 +461,37 @@ public class GameBoardController implements Initializable, ControlledScreen {
 		}
 	}
 	
+	@FXML 
+	void runTestSeriesPressed(ActionEvent event){
+		if (runTestSeries){
+			runTestSeries = false;
+			runTestSeriesButton.setTextFill(Color.BLACK);
+		} else {
+			runTestSeriesButton.setTextFill(Color.GREEN);
+			if (testMoves.size() == 0){
+				buildTestRun();
+			}
+			runTestSeries = true;
+			if (learning){
+				aILearningEnabledPressed(event);
+			}
+			if (lambdaEnabled){
+				lambdaEnabledPressed(event);
+			}
+			testRunStart = 1;
+			resetRunsPressed(event);
+			numRuns = testMoves.size();
+			numRunsField.setText(numRuns + "");
+			numRuns++;
+			moves.clear();
+			R = testMoves.get(0).getR();
+			C = testMoves.get(0).getC();
+			numberOfMoves = 0;
+			avgMoves = 0;
+			percentRand = 0;
+			totalMoves = 0;
+		}
+	}
 	//==============================================================================
 	// NON-FXML Methods
 	void resetMapColors(){
@@ -483,7 +521,11 @@ public class GameBoardController implements Initializable, ControlledScreen {
 		//System.out.println("STOP RESET BOARD COLORS");
 	}
 	
-
+	void fixGoalState(){
+		if (Main.MACHINE.qtable[goalR][goalC].isWall()){
+			Main.MACHINE.qtable[goalR][goalC].setWall(false);
+		}
+	}
 	
 	void updateBoard(){
 		//X = Double.parseDouble(XField.getText());
@@ -525,6 +567,25 @@ public class GameBoardController implements Initializable, ControlledScreen {
 				//pane.getChildren().add(rectangles[r][c]);
 				//content.getChildren().add(rectangles[r][c]);
 				pane.getChildren().add(rectangles[r][c]);
+			}
+		}
+	}
+	
+	void buildTestRun(){
+		for (int r = 0; r < Main.ROWS; r++){
+			if(!Main.MACHINE.qtable[r][0].isWall() && !Main.MACHINE.qtable[r][0].isGoal()){
+				testMoves.add(new Move(r, 0));
+			}
+			if(!Main.MACHINE.qtable[r][Main.COLUMNS-1].isWall() && !Main.MACHINE.qtable[r][Main.COLUMNS-1].isGoal()){
+				testMoves.add(new Move(r, Main.COLUMNS-1));
+			}
+		}
+		for (int c = 0; c < Main.COLUMNS; c++){
+			if(!Main.MACHINE.qtable[0][c].isWall() && !Main.MACHINE.qtable[0][c].isGoal()){
+				testMoves.add(new Move(0, c));
+			}
+			if(!Main.MACHINE.qtable[Main.ROWS-1][c].isWall() && !Main.MACHINE.qtable[Main.ROWS-1][c].isGoal()){
+				testMoves.add(new Move(Main.ROWS-1, c));
 			}
 		}
 	}
@@ -730,11 +791,14 @@ public class GameBoardController implements Initializable, ControlledScreen {
 				Main.MACHINE.qtable[r][c] = state.getQtable(r,c);
 			}
 		}
+		fixGoalState();
 		buildArrows();
 		updateBoard();
 		pauseButton.requestFocus();
 		startLoop();
 	}
+	
+	
 	boolean getInput(){
 		input = seedMinField.getText();
 		try {
@@ -853,6 +917,20 @@ public class GameBoardController implements Initializable, ControlledScreen {
 				numRunsField.requestFocus();
 				return false;
 			}
+			numRuns++;
+		} catch (Exception e) {
+			numRunsField.requestFocus();
+			return false;
+		}
+		input = percentWallsField.getText();
+		try {
+			percentWalls = Integer.parseInt(input);
+			if (percentWalls < 0 || percentWalls > 60){
+				
+				percentWallsField.requestFocus();
+				return false;
+			}
+			percentWalls *= .01;
 		} catch (Exception e) {
 			numRunsField.requestFocus();
 			return false;
@@ -862,7 +940,7 @@ public class GameBoardController implements Initializable, ControlledScreen {
 	
 	public void makeWalls(){
 		int blockX, blockY;
-		int numBlocks = (int)(0.1 * (Main.COLUMNS * Main.ROWS));
+		int numBlocks = (int)(percentWalls * (Main.COLUMNS * Main.ROWS));
 		//System.out.println("the number of blocks = " + numBlocks);
 		for (int i = 0; i < numBlocks; i++){
 			Random num = new Random();
@@ -875,6 +953,17 @@ public class GameBoardController implements Initializable, ControlledScreen {
 				Main.MACHINE.qtable[blockX][blockY].setColor("DARKGREY");
 				rectangles[blockX][blockY].setFill(colorTable.get(Color.DARKGREY));
 				//System.out.println("blockX: " + blockX + "  blockY: " + blockY + "isWall: " + Main.MACHINE.qtable[blockX][blockY].isWall() + " Color: " +  Main.MACHINE.qtable[blockX][blockY].getColor());
+			}
+		}
+		for (int r = 0; r < Main.ROWS; r++){
+			for (int c = 0; c < Main.COLUMNS; c++){
+				Main.MACHINE.qtable[r][c].setMoves();
+				if (Main.MACHINE.qtable[r][c].isNoValidMoves() && !Main.MACHINE.qtable[r][c].isGoal()){
+					Main.MACHINE.qtable[r][c].setWall(true);
+					Main.MACHINE.qtable[r][c].setColor("DARKGREY");
+					rectangles[r][c].setFill(colorTable.get(Color.DARKGREY));
+					System.out.println("Map fixed at [" + r + "][" + c +"]");
+				}
 			}
 		}
 	}
@@ -1099,7 +1188,7 @@ public class GameBoardController implements Initializable, ControlledScreen {
 									deltaQLabel.setText("---");
 									nextR = Main.MACHINE.getNextR();
 									nextC = Main.MACHINE.getNextC();
-									
+									Main.MACHINE.qtable[R][C].updateSquareDisplay();
 								}
 								R = nextR;
 								C = nextC;
@@ -1152,7 +1241,13 @@ public class GameBoardController implements Initializable, ControlledScreen {
 									resetMapColors();
 									moves.clear();
 									//choose new starting point
-									if(random){
+									if(runTestSeries){
+										if (testRunStart < testMoves.size()){
+											R = testMoves.get(testRunStart).getR();
+											C = testMoves.get(testRunStart).getC();
+										}
+										testRunStart++;
+									} else if (random){
 										setStartPos();
 									} else {
 										int fixedR = -1, fixedC = -1;
@@ -1201,8 +1296,10 @@ public class GameBoardController implements Initializable, ControlledScreen {
 									}
 									moves.add(new Move(startR,startC));
 									System.out.println("New Start Pos= [" + startR + "][" + startC + "]" );
-									
+									startR = R;
+									startC = C;
 									rectangles[startR][startC].setFill(Color.BLUEVIOLET);
+									
 									//erase linked list of moves
 									
 									//decay lambda
@@ -1211,7 +1308,7 @@ public class GameBoardController implements Initializable, ControlledScreen {
 									Main.MACHINE.setFoundGoal(false);
 									updateBoard();
 									
-									if(runs > numRuns){
+									if(runs >= numRuns - 1){
 										errorStop();
 									}
 								}
