@@ -77,7 +77,6 @@ public class Square implements Serializable {
 	public void setWeight(double weight) {
 		this.weight = weight;
 	}
-	
 	public double getScaleFactor() {
 		return scaleFactor;
 	}
@@ -128,7 +127,6 @@ public class Square implements Serializable {
 	public double getDirection() {
 		return direction;
 	}
-	
 	public boolean isGoal() {
 		return isGoal;
 	}
@@ -171,19 +169,13 @@ public class Square implements Serializable {
 	public void setMoveIsGoal(boolean moveIsGoal) {
 		this.moveIsGoal = moveIsGoal;
 	}
-	
 	public boolean isNoValidMoves() {
 		return noValidMoves;
 	}
-
 	public void setNoValidMoves(boolean noValidMoves) {
 		this.noValidMoves = noValidMoves;
 	}
 
-	
-	
-	
-	
 	//==============================================================================
 	// methods
 
@@ -237,7 +229,6 @@ public class Square implements Serializable {
 		} else {
 			setScaleFactor(weight);
 		}
-		
 		setRotation(Math.atan2(rayX, rayY));
 		//System.out.println ("RayX: " + rayX + " rayY: " + rayY + " rotation radians: " + rotation);
 		rotation = rotation * (180.0 / Math.PI);
@@ -248,7 +239,6 @@ public class Square implements Serializable {
 			Main.GBC.arrows[r][c].setRotate(rotation);
 		}
 		System.out.println("Update Display: [" + r + "][" + c + "] dir:" + direction + " mag: " + magnitude + "  Rotation: " + rotation + " move is goal: " + moveIsGoal);
-		
 	}
 	
 	public int setDirection(){
@@ -308,16 +298,15 @@ public class Square implements Serializable {
 			val = lV;
 			dir = 270;
 		}
-		
 		if(uV > val){
 			val = uV;
 			dir = 0;
 		}
-		
 		if(dV > val){
 			val = dV;
 			dir = 180;
 		}
+		
 		direction = dir;
 		if(dir == 270){ //move left
 			moveR = r-1;

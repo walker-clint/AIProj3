@@ -1324,7 +1324,6 @@ public class GameBoardController implements Initializable, ControlledScreen {
 		}, 0, 1);
 	}
 	
-	
 	void startTimerLoop(){
 		clockTimer = new Timer();
 		counter = 0;
